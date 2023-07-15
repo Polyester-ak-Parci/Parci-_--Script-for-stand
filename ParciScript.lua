@@ -316,10 +316,7 @@ memScan("VB", "CD CC CC BC 00 00 00 00 CD CC CC 3D CD CC CC 3E", function (ptr)
 end)
 
 
-local LocalisationPtr -- vehicle base ptr
-memScan("Localisation", "AA 23 35 85 FF FF FF FF 00 00 00 00", function (ptr)
-	LocalisationPtr = ptr + 0x6CC
-end)
+local LocalisationPtr = worldPtr - 0x596074
 
 onEnter = {}
 onTick = {}
