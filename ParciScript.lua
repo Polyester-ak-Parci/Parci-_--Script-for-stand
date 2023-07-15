@@ -941,30 +941,39 @@ end
 local function isThisVehicle4Wheel(vehicleHash)
     return VEHICLE.IS_THIS_MODEL_A_CAR(vehicleHash) or VEHICLE.IS_THIS_MODEL_A_QUADBIKE(vehicleHash) or VEHICLE.IS_THIS_MODEL_AN_AMPHIBIOUS_CAR(vehicleHash) or VEHICLE.IS_THIS_MODEL_AN_AMPHIBIOUS_QUADBIKE(vehicleHash)
 end
-util.toast(nToHexStr(DPPtr - 0x6A5BF))
-util.toast(nToHexStr(DPPtr - 0x452BA))
-util.toast(nToHexStr(DPPtr - 0x45113))
-util.toast(nToHexStr(DPPtr - 0x450F9))
-util.toast(nToHexStr(DPPtr - 0x45078))
-util.toast(nToHexStr(DPPtr - 0x44ED4))
+
 local function vehicleSpoofPatch(toggle)
     if toggle then
         Mem:new(DPPtr):writeLong(hexStrToN("110FF39090901AEB"))
+
         Mem:new(DPPtr - 0x6A5BF):writeLong(hexStrToN("90909090909009EB"))
         Mem:new(DPPtr - 0x452BA):writeLong(hexStrToN("40468B90909003EB"))
         Mem:new(DPPtr - 0x45113):writeLong(hexStrToN("D3C60F90909003EB"))
         Mem:new(DPPtr - 0x450F9):writeLong(hexStrToN("590FF390909008EB"))
         Mem:new(DPPtr - 0x45078):writeLong(hexStrToN("F6854D90909003EB"))
         Mem:new(DPPtr - 0x44ED4):writeLong(hexStrToN("D0C60F90909003EB"))
+
+        Mem:new(DPPtr + 0x171C9):writeLong(hexStrToN("90909090909006EB"))
+        Mem:new(DPPtr - 0x44CF6):writeLong(hexStrToN("90909090909007EB"))
+        Mem:new(DPPtr - 0x44CF6 + 8):writeByte(hexStrToN("90"))
+        Mem:new(DPPtr - 0x44AFF):writeLong(hexStrToN("90909090909006EB"))
+        Mem:new(DPPtr - 0x448DC):writeLong(hexStrToN("F3057690909003EB"))
         return toggle
     else
         Mem:new(DPPtr):writeLong(hexStrToN("110FF33059110FF3"))
+
         Mem:new(DPPtr - 0x6A5BF):writeLong(hexStrToN("0000009CB0590FF3"))
         Mem:new(DPPtr - 0x452BA):writeLong(hexStrToN("40468B3C40590FF3"))
         Mem:new(DPPtr - 0x45113):writeLong(hexStrToN("D3C60F3448590FF3"))
         Mem:new(DPPtr - 0x450F9):writeLong(hexStrToN("590FF33450590FF3"))
         Mem:new(DPPtr - 0x45078):writeLong(hexStrToN("F6854D7C48100FF3"))
         Mem:new(DPPtr - 0x44ED4):writeLong(hexStrToN("D0C60F3858100FF3"))
+
+        Mem:new(DPPtr + 0x171C9):writeLong(hexStrToN("0000009480100FF3"))
+        Mem:new(DPPtr - 0x44CF6):writeLong(hexStrToN("00008888100F44F3"))
+        Mem:new(DPPtr - 0x44CF6 + 8):writeByte(hexStrToN("00"))
+        Mem:new(DPPtr - 0x44AFF):writeLong(hexStrToN("0000008C80100FF3"))
+        Mem:new(DPPtr - 0x448DC):writeLong(hexStrToN("F305763070590FF3"))
         return toggle
     end
 end
