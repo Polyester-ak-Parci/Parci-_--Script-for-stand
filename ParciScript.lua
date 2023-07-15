@@ -517,7 +517,7 @@ menu.toggle_loop(vehicleFolder, "Horn boost instant recharge", {"hbinstantrechar
 end)
 
 
-menu.toggle_loop(vehicleFolder, "Afterburner on planes", {"planesafterburner"}, "Do what it does. \n(Acceleration speed depends on the value above)", function()
+menu.toggle_loop(vehicleFolder, "Afterburner on planes", {"planesafterburner"}, "Do what it does. \n(Acceleration speed depends on the value below)", function()
     if gVehicleState.currentPedVehiclePtr.isNil() then return end
     if not VEHICLE.IS_THIS_MODEL_A_PLANE(ENTITY.GET_ENTITY_MODEL(gVehicleState.currentPedVehicleId)) then 
         afterburnerOnPlanes = false
