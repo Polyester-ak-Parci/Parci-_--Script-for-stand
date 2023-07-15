@@ -447,6 +447,7 @@ boostedVehicles[util.joaat("bombushka")] = true
 boostedVehicles[util.joaat("tula")] = true
 
 local setHornBoostForAll = false
+local entry = true
 onTick[#onTick+1] = function()
     if gVehicleState.vehicleChanged or entry then
         if gVehicleState.lastPedVehicle ~= 0 and not entry then
@@ -460,7 +461,9 @@ onTick[#onTick+1] = function()
 
         if not gVehicleState.currentPedVehiclePtr.isNil() then
             local checkBoost = Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x20):offset(0x58B):readByte()
-            if checkBoost == 0x40 or checkBoost == 0x60 then
+            
+            local checkBoost = uintToBitStr(checkBoost, 8)
+            if tonumber(checkBoost:sub(#checkBoost-6, #checkBoost-6)) then
                 menu.set_value(hbToggle, true)
                 hbState = true
             else
@@ -473,7 +476,17 @@ onTick[#onTick+1] = function()
     elseif not gVehicleState.currentPedVehiclePtr.isNil() then
         toggleHornBoost(hbState or afterburnerOnPlanes, Mem:new(gVehicleState.currentPedVehiclePtr.readLong()+0x20))
     end
+    
+    entry = false
 end
+onStop[#onStop+1] = function ()
+    if not gVehicleState.currentPedVehiclePtr.isNil() then
+        if boostedVehicles[ENTITY.GET_ENTITY_MODEL(gVehicleState.currentPedVehicleId)] then
+            toggleHornBoost(true, Mem:new(gVehicleState.lastPedVehicle + 0x20))
+        end
+    end
+end
+
 
 
 
@@ -1291,7 +1304,8 @@ menu.toggle_loop(vehicleFolder, 'Boost on B gamepad' ,{"rebindboostonbgamepad"},
         end
     end
     if gVehicleState.currentVehicleEntry ~= 0 then
-        if Mem:new(gVehicleState.currentVehicleEntry + 0x1F4A ):readShort() ~= 0 then
+        if VEHICLE.IS_THIS_MODEL_A_PLANE(ENTITY.GET_ENTITY_MODEL(gVehicleState.currentPedVehicleId))
+        and Mem:new(gVehicleState.currentVehicleEntry + 0x1F4A ):readShort() ~= 0 then
             Mem:new(gVehicleState.currentVehicleEntry + 0x2F8):writeByte(0)
         end
     end
