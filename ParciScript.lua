@@ -1079,12 +1079,12 @@ onStop[#onStop+1] = function ()
         if ENTITY.DOES_ENTITY_EXIST(gVehicleState.lastPedVehicleId) then
             VEHICLE.SET_SPECIAL_FLIGHT_MODE_TARGET_RATIO(gVehicleState.lastPedVehicleId, 0)
         end
-        if isPlayerInVehicle and not (gVehicleState.vehicleChanged) then
+        if PED.IS_PED_IN_ANY_VEHICLE(PLAYER.PLAYER_PED_ID(), false) and not (gVehicleState.vehicleChanged) then
             if not gVehicleState.currentPedVehiclePtr.isNil() then
-                Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x918):offset(0x158):writeLong(lastVehicleDeluxoSpoof)
+                Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x918):offset(0x158):offset(0x0):writeLong(lastVehicleDeluxoSpoof)
             end
         else    
-            Mem:new(gVehicleState.lastPedVehicleHandlingPtr + 0x158):writeLong(lastVehicleDeluxoSpoof)
+            Mem:new(gVehicleState.lastPedVehicleHandlingPtr + 0x158):offset(0x0):writeLong(lastVehicleDeluxoSpoof)
         end
         lastVehicleDeluxoSpoof = nil
     end
@@ -1354,6 +1354,14 @@ math.floor(round(memory.read_float(camOffsetZPtr.get()), 100)*100), 0.1*100,  fu
     capacity /= 100
     setCamZOffset(capacity)
 end)
+
+
+local pedVehicleOffsetZPtr = Mem:new(CCamPtr):offset(0):offset(0x2C0):offset(0x210):offset(0x7C)
+
+local setPedVehicleZOffset = function(val)
+    pedVehicleOffsetZPtr = Mem:new(CCamPtr):offset(0):offset(0x2C0):offset(0x210):offset(0x7C)
+    memory.write_float(pedVehicleOffsetZPtr.get(), val)
+end
 
 -- Localisation options
 
