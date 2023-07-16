@@ -1356,12 +1356,33 @@ math.floor(round(memory.read_float(camOffsetZPtr.get()), 100)*100), 0.1*100,  fu
 end)
 
 
-local pedVehicleOffsetZPtr = Mem:new(CCamPtr):offset(0):offset(0x2C0):offset(0x210):offset(0x7C)
+local pedVehicleOffsetXPtr = Mem:new(CCamPtr):offset(0):offset(0x2C0):offset(0x210):offset(0x7C)
+
+local setPedVehicleXOffset = function(val)
+    pedVehicleOffsetXPtr = Mem:new(CCamPtr):offset(0):offset(0x2C0):offset(0x210):offset(0x7C)
+    memory.write_float(pedVehicleOffsetXPtr.get(), val)
+end
+
+local pedVehicleOffset = menu.slider_float(camOptions, "Ped vehicle X Offset", {"parcisctiptpedvehxoffset"}, "The offset of ped relative to the vehicle. Works on bikes and motorcycles", -100*100, 100*100,
+math.floor(round(memory.read_float(pedVehicleOffsetXPtr.get()), 100)*100), 0.1*100,  function(capacity)
+    pedVehicleOffsetXPtr = Mem:new(CCamPtr):offset(0):offset(0x2C0):offset(0x210):offset(0x7C)
+    capacity /= 100
+    setPedVehicleXOffset(capacity)
+end)
+
+local pedVehicleOffsetZPtr = Mem:new(CCamPtr):offset(0):offset(0x2C0):offset(0x210):offset(0x8C)
 
 local setPedVehicleZOffset = function(val)
-    pedVehicleOffsetZPtr = Mem:new(CCamPtr):offset(0):offset(0x2C0):offset(0x210):offset(0x7C)
+    pedVehicleOffsetZPtr = Mem:new(CCamPtr):offset(0):offset(0x2C0):offset(0x210):offset(0x8C)
     memory.write_float(pedVehicleOffsetZPtr.get(), val)
 end
+
+local pedVehicleOffset = menu.slider_float(camOptions, "Ped vehicle Z Offset", {"parcisctiptpedvehzoffset"}, "The offset of ped relative to the vehicle. Works on bikes and motorcycles", -100*100, 100*100,
+math.floor(round(memory.read_float(pedVehicleOffsetZPtr.get()), 100)*100), 0.1*100,  function(capacity)
+    pedVehicleOffsetZPtr = Mem:new(CCamPtr):offset(0):offset(0x2C0):offset(0x210):offset(0x8C)
+    capacity /= 100
+    setPedVehicleZOffset(capacity)
+end)
 
 -- Localisation options
 
