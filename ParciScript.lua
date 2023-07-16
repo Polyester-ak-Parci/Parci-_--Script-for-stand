@@ -463,7 +463,7 @@ onTick[#onTick+1] = function()
             local checkBoost = Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x20):offset(0x58B):readByte()
             
             local checkBoost = uintToBitStr(checkBoost, 8)
-            if tonumber(checkBoost:sub(#checkBoost-6, #checkBoost-6)) then
+            if tonumber(checkBoost:sub(#checkBoost-6, #checkBoost-6)) == 1 then
                 menu.set_value(hbToggle, true)
                 hbState = true
             else
@@ -483,6 +483,8 @@ onStop[#onStop+1] = function ()
     if not gVehicleState.currentPedVehiclePtr.isNil() then
         if boostedVehicles[ENTITY.GET_ENTITY_MODEL(gVehicleState.currentPedVehicleId)] then
             toggleHornBoost(true, Mem:new(gVehicleState.lastPedVehicle + 0x20))
+        else
+            toggleHornBoost(false, Mem:new(gVehicleState.lastPedVehicle + 0x20))
         end
     end
 end
@@ -1018,8 +1020,8 @@ onTick[#onTick+1] = function ()
             if lastVehicleDeluxoSpoof ~= nil and lastVehicleDeluxoSpoof ~= 0 and gVehicleState.lastPedVehicleHandlingPtr ~= 0 and gVehicleState.lastPedVehicleHandlingPtr ~= nil then
                 if ENTITY.DOES_ENTITY_EXIST(gVehicleState.lastPedVehicleId) and ENTITY.GET_ENTITY_MODEL(gVehicleState.lastPedVehicleId) ~= util.joaat("deluxo") then
                     VEHICLE.SET_SPECIAL_FLIGHT_MODE_RATIO(gVehicleState.lastPedVehicleId, 0.001)
-                    util.yield()
                     VEHICLE.SET_SPECIAL_FLIGHT_MODE_TARGET_RATIO(gVehicleState.lastPedVehicleId, 0)
+                    util.yield()
                 end
                 if gVehicleState.lastPedVehicleHandlingPtr ~= 0 then
                     Mem:new(gVehicleState.lastPedVehicleHandlingPtr + 0x158):offset(0x0):writeLong(lastVehicleDeluxoSpoof)
@@ -1031,8 +1033,8 @@ onTick[#onTick+1] = function ()
             if lastVehicleDeluxoSpoof ~= nil and lastVehicleDeluxoSpoof ~= 0 then
                 if ENTITY.DOES_ENTITY_EXIST(gVehicleState.lastPedVehicleId) and ENTITY.GET_ENTITY_MODEL(gVehicleState.lastPedVehicleId) ~= util.joaat("deluxo") then
                     VEHICLE.SET_SPECIAL_FLIGHT_MODE_RATIO(gVehicleState.lastPedVehicleId, 0.001)
-                    util.yield()
                     VEHICLE.SET_SPECIAL_FLIGHT_MODE_TARGET_RATIO(gVehicleState.lastPedVehicleId, 0)
+                    util.yield()
                 end
                 
                 if gVehicleState.lastPedVehicleHandlingPtr ~= 0 then
@@ -1052,8 +1054,8 @@ onTick[#onTick+1] = function ()
         if lastVehicleDeluxoSpoof ~= nil and lastVehicleDeluxoSpoof ~= 0 then
             if ENTITY.DOES_ENTITY_EXIST(gVehicleState.lastPedVehicleId) then
                 VEHICLE.SET_SPECIAL_FLIGHT_MODE_RATIO(gVehicleState.lastPedVehicleId, 0.001)
-                util.yield()
                 VEHICLE.SET_SPECIAL_FLIGHT_MODE_TARGET_RATIO(gVehicleState.lastPedVehicleId, 0)
+                util.yield()
             end
             if isPlayerInVehicle and not (gVehicleState.vehicleChanged) then
                 if not gVehicleState.currentPedVehiclePtr.isNil() then
@@ -1071,14 +1073,12 @@ onPreStop[#onPreStop+1] = function ()
     if lastVehicleDeluxoSpoof ~= nil and lastVehicleDeluxoSpoof ~= 0 then
         if ENTITY.DOES_ENTITY_EXIST(gVehicleState.lastPedVehicleId) then
             VEHICLE.SET_SPECIAL_FLIGHT_MODE_RATIO(gVehicleState.lastPedVehicleId, 0.001)
+            VEHICLE.SET_SPECIAL_FLIGHT_MODE_TARGET_RATIO(gVehicleState.lastPedVehicleId, 0)
         end
     end
 end
 onStop[#onStop+1] = function ()
     if lastVehicleDeluxoSpoof ~= nil and lastVehicleDeluxoSpoof ~= 0 then
-        if ENTITY.DOES_ENTITY_EXIST(gVehicleState.lastPedVehicleId) then
-            VEHICLE.SET_SPECIAL_FLIGHT_MODE_TARGET_RATIO(gVehicleState.lastPedVehicleId, 0)
-        end
         if PED.IS_PED_IN_ANY_VEHICLE(PLAYER.PLAYER_PED_ID(), false) and not (gVehicleState.vehicleChanged) then
             if not gVehicleState.currentPedVehiclePtr.isNil() then
                 Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x918):offset(0x158):offset(0x0):writeLong(lastVehicleDeluxoSpoof)
@@ -1099,8 +1099,8 @@ local ttdmMenu = menu.toggle(vehicleFolder, 'Transform to Deluxo mod' ,{"transfo
         if toggle and Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x362).readShort() ~= 0x3F80 then
             enableDeluxoTransform = true
             deluxoTransformOnTransition = true
-            VEHICLE.SET_SPECIAL_FLIGHT_MODE_RATIO(gVehicleState.lastPedVehicleId, 0)
-            VEHICLE.SET_SPECIAL_FLIGHT_MODE_TARGET_RATIO(gVehicleState.lastPedVehicleId, 1)
+            VEHICLE.SET_SPECIAL_FLIGHT_MODE_RATIO(gVehicleState.currentPedVehicleId, 0)
+            VEHICLE.SET_SPECIAL_FLIGHT_MODE_TARGET_RATIO(gVehicleState.currentPedVehicleId, 1)
             while gVehicleState.currentVehicleEntry ~= 0 and (not gVehicleState.vehicleChanged) 
             and Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x362).readShort() ~= 0x3F80 do
                 util.yield()
@@ -1109,8 +1109,8 @@ local ttdmMenu = menu.toggle(vehicleFolder, 'Transform to Deluxo mod' ,{"transfo
         elseif not toggle and Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x362).readShort() ~= 0x0 then
             enableDeluxoTransform = false
             deluxoTransformOnTransition = true
-            VEHICLE.SET_SPECIAL_FLIGHT_MODE_RATIO(gVehicleState.lastPedVehicleId, 1)
-            VEHICLE.SET_SPECIAL_FLIGHT_MODE_TARGET_RATIO(gVehicleState.lastPedVehicleId, 0)
+            VEHICLE.SET_SPECIAL_FLIGHT_MODE_RATIO(gVehicleState.currentPedVehicleId, 1)
+            VEHICLE.SET_SPECIAL_FLIGHT_MODE_TARGET_RATIO(gVehicleState.currentPedVehicleId, 0)
             while gVehicleState.currentVehicleEntry ~= 0 and (not gVehicleState.vehicleChanged) 
             and Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x362).readShort() ~= 0x0 do
                 util.yield()
