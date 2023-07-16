@@ -26,7 +26,7 @@ end
 if auto_updater == true then error("Invalid auto-updater lib. Please delete your Stand/Lua Scripts/lib/auto-updater.lua and try again") end
 
 -- Run auto-updater
-update_success = auto_updater.run_auto_update({
+auto_updater.run_auto_update({
     source_url="https://raw.githubusercontent.com/Polyester-ak-Parci/Parci-_--Script-for-stand/main/ParciScript.lua",
     script_relpath=SCRIPT_RELPATH,
 })
