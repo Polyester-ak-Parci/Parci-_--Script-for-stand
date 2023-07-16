@@ -517,7 +517,7 @@ menu.toggle_loop(vehicleFolder, "Horn boost instant recharge", {"hbinstantrechar
 end)
 
 
-menu.toggle_loop(vehicleFolder, "Afterburner on planes", {"planesafterburner"}, "Do what it does. \n(Acceleration speed depends on the value below)", function()
+menu.toggle_loop(vehicleFolder, "Afterburner on planes", {"planesafterburner"}, "Do what it does.\n(Shift on controller or L3 on gamepad) \n(Acceleration speed depends on the value below)", function()
     if gVehicleState.currentPedVehiclePtr.isNil() then return end
     if not VEHICLE.IS_THIS_MODEL_A_PLANE(ENTITY.GET_ENTITY_MODEL(gVehicleState.currentPedVehicleId)) then 
         afterburnerOnPlanes = false
@@ -1320,7 +1320,7 @@ local setCamXOffset = function(val)
     memory.write_float(camOffsetXPtr.get(), val)
 end
 
-local camXOffset = menu.slider_float(camOptions, "Cam X Offset", {"parcisctiptcamxoffset"}, "", -1*999999999*100, 999999999*100, 
+local camXOffset = menu.slider_float(camOptions, "Cam X Offset", {"parcisctiptcamxoffset"}, "(Dosnt work on first face cam)", -1*999999999*100, 999999999*100,
 math.floor(round(memory.read_float(camOffsetXPtr.get()), 100)*100), 0.1*100,  function(capacity)
     camOffsetXPtr = Mem:new(CCamPtr):offset(0):offset(0x2C0):offset(0x208):offset(0x118)
     capacity /= 100
@@ -1334,7 +1334,7 @@ local setCamZoom = function(val)
     memory.write_float(camZoomPtr.get(), val)
 end
 
-local camZoom = menu.slider_float(camOptions, "Cam Zoom", {"parcisctiptcamzoom"}, "", -1*0.4*100, 999999999*100, 
+local camZoom = menu.slider_float(camOptions, "Cam Zoom", {"parcisctiptcamzoom"}, "(Dosnt work on first face cam)", -1*0.4*100, 999999999*100,
 math.floor(round(memory.read_float(camZoomPtr.get()), 100)*100), 0.1*100,  function(capacity)
     camZoomPtr = Mem:new(CCamPtr):offset(0):offset(0x2C0):offset(0x208):offset(0x168)
     capacity /= 100
@@ -1348,7 +1348,7 @@ local setCamZOffset = function(val)
     memory.write_float(camOffsetZPtr.get(), val)
 end
 
-local camZOffset = menu.slider_float(camOptions, "Cam Z Offset", {"parcisctiptcamzoffset"}, "", 0.5*100, 999999999*100, 
+local camZOffset = menu.slider_float(camOptions, "Cam Z Offset", {"parcisctiptcamzoffset"}, "(Dosnt work on first face cam)", 0.5*100, 999999999*100,
 math.floor(round(memory.read_float(camOffsetZPtr.get()), 100)*100), 0.1*100,  function(capacity)
     camOffsetZPtr = Mem:new(CCamPtr):offset(0):offset(0x2C0):offset(0x208):offset(0x88)
     capacity /= 100
