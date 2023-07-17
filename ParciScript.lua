@@ -1009,6 +1009,9 @@ menu.toggle(vehicleFolder, 'Deluxo Mod' ,{"enableodeluxomod"},
 end, enableDeluxoMod)
 
 
+local enableDeluxoTransform = false
+local deluxoTransformOnTransition = false
+
 onTick[#onTick+1] = function ()
     local playerEnvehicle = not isPlayerInVehicle and PED.IS_PED_IN_ANY_VEHICLE(PLAYER.PLAYER_PED_ID(), false)
     local playerExvehicle = isPlayerInVehicle and not PED.IS_PED_IN_ANY_VEHICLE(PLAYER.PLAYER_PED_ID(), false)
@@ -1067,6 +1070,8 @@ onTick[#onTick+1] = function ()
             lastVehicleDeluxoSpoof = nil
         end
         enableDeluxoModE = true
+        enableDeluxoTransform = false
+        deluxoTransformOnTransition = false
     end
 end
 onPreStop[#onPreStop+1] = function ()
@@ -1090,8 +1095,8 @@ onStop[#onStop+1] = function ()
     end
 end
 
-local enableDeluxoTransform = false
-local deluxoTransformOnTransition = false
+enableDeluxoTransform = false
+deluxoTransformOnTransition = false
 local ttdmMenu = menu.toggle(vehicleFolder, 'Transform to Deluxo mod' ,{"transformodeluxomode"}, 
 "Switches the vehicle to Deluxo flight mode \n(Enable the above function first)", function(toggle)
     if enableDeluxoMod and (not enableDeluxoModTriggered) and gVehicleState.currentPedVehicleId and ENTITY.GET_ENTITY_MODEL(gVehicleState.currentPedVehicleId) ~= util.joaat("deluxo") 
