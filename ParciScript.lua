@@ -453,7 +453,7 @@ local entry = true
 onTick[#onTick+1] = function()
     if gVehicleState.vehicleChanged or entry then
         if gVehicleState.lastPedVehicle ~= 0 and not entry then
-            local lastPedVehicleHash = ENTITY.GET_ENTITY_MODEL(gVehicleState.currentPedVehicleId)
+            local lastPedVehicleHash = ENTITY.GET_ENTITY_MODEL(gVehicleState.lastPedVehicleId)
             if boostedVehicles[lastPedVehicleHash] ~= nil and boostedVehicles[lastPedVehicleHash] == true then
                 toggleHornBoost(true, Mem:new(gVehicleState.lastPedVehicle + 0x20))
             else 
