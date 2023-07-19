@@ -975,6 +975,9 @@ local function vehicleSpoofPatch(toggle)
         Mem:new(DPPtr - 0x44CF6 + 8):writeByte(hexStrToN("90"))
         Mem:new(DPPtr - 0x44AFF):writeLong(hexStrToN("90909090909006EB"))
         Mem:new(DPPtr - 0x448DC):writeLong(hexStrToN("F3057690909003EB"))
+
+        Mem:new(DPPtr + 0x1C469):writeLong(hexStrToN("0F449090909004EB"))
+        Mem:new(DPPtr - 0x6B3D4):writeLong(hexStrToN("0AE9830F909002EB"))
         return toggle
     else
         Mem:new(DPPtr):writeLong(hexStrToN("110FF33059110FF3"))
@@ -991,6 +994,9 @@ local function vehicleSpoofPatch(toggle)
         Mem:new(DPPtr - 0x44CF6 + 8):writeByte(hexStrToN("00"))
         Mem:new(DPPtr - 0x44AFF):writeLong(hexStrToN("0000008C80100FF3"))
         Mem:new(DPPtr - 0x448DC):writeLong(hexStrToN("F305763070590FF3"))
+        
+        Mem:new(DPPtr + 0x1C469):writeLong(hexStrToN("0F445048100F44F3"))
+        Mem:new(DPPtr - 0x6B3D4):writeLong(hexStrToN("0AE9830F58782F0F"))
         return toggle
     end
 end
@@ -1000,8 +1006,11 @@ local enableDeluxoMod = false
 local enableDeluxoModTriggered = false
 local enableOppressor2ModE = true
 local enableDeluxoModE = true
-local function onVehicleSpoofNeeded() return enableDeluxoMod or enableOppressor2Mod end
-local function onVehicleSpoofAToDisable() return enableDeluxoModE and enableOppressor2ModE end
+local lastVehicleDosntOp = false
+local function onVehicleSpoofNeeded() return (enableDeluxoMod or enableOppressor2Mod) 
+    and (not (gVehicleState.vehicleChanged or playerEnvehicle) and ENTITY.GET_ENTITY_MODEL(gVehicleState.lastPedVehicleId) ~= util.joaat("oppressor")) end
+local function onVehicleSpoofAToDisable() return (enableDeluxoModE and enableOppressor2ModE)
+    or ENTITY.GET_ENTITY_MODEL(gVehicleState.currentPedVehicleId) == util.joaat("oppressor") end
 local lastVehicleDeluxoSpoof = nil
 local isPlayerInVehicle = false
 menu.toggle(vehicleFolder, 'Deluxo Mod' ,{"enableodeluxomod"}, 
@@ -1018,7 +1027,9 @@ onTick[#onTick+1] = function ()
     local playerEnvehicle = not isPlayerInVehicle and PED.IS_PED_IN_ANY_VEHICLE(PLAYER.PLAYER_PED_ID(), false)
     local playerExvehicle = isPlayerInVehicle and not PED.IS_PED_IN_ANY_VEHICLE(PLAYER.PLAYER_PED_ID(), false)
     isPlayerInVehicle = PED.IS_PED_IN_ANY_VEHICLE(PLAYER.PLAYER_PED_ID(), false)
-    if onVehicleSpoofNeeded() then vehicleSpoofPatch(onVehicleSpoofNeeded()) end
+    if onVehicleSpoofNeeded() then 
+        vehicleSpoofPatch(onVehicleSpoofNeeded()) 
+    end
     enableDeluxoModE = false
     if enableDeluxoMod then
         if gVehicleState.vehicleChanged then
@@ -1051,9 +1062,15 @@ onTick[#onTick+1] = function ()
         if (gVehicleState.vehicleChanged or playerEnvehicle or enableDeluxoModTriggered) and (not gVehicleState.currentPedVehiclePtr.isNil()) and isPlayerInVehicle 
         and gVehicleState.isCurrentVehicleEntry() and isThisVehicle4Wheel(ENTITY.GET_ENTITY_MODEL(gVehicleState.currentPedVehicleId)) 
         and ENTITY.GET_ENTITY_MODEL(gVehicleState.currentPedVehicleId) ~= util.joaat("deluxo") then
-            lastVehicleDeluxoSpoof = Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x918):offset(0x158):offset(0x0).readLong()
-            Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x918):offset(0x158):offset(0x0):writeLong(Mem:new(VBPtr):offset(0xEA0):offset(0x158):offset(0x0):readLong())
-            enableDeluxoModTriggered = false
+            if playerEnvehicle and ENTITY.GET_ENTITY_MODEL(gVehicleState.lastPedVehicleId) == util.joaat("oppressor") then
+                util.yield()
+            else
+                vehicleSpoofPatch(true) 
+                util.yield()
+                lastVehicleDeluxoSpoof = Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x918):offset(0x158):offset(0x0).readLong()
+                Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x918):offset(0x158):offset(0x0):writeLong(Mem:new(VBPtr):offset(0xEA0):offset(0x158):offset(0x0):readLong())
+                enableDeluxoModTriggered = false
+            end
         end
     else
         if lastVehicleDeluxoSpoof ~= nil then
@@ -1156,7 +1173,7 @@ util.create_tick_handler(function ()
     end
 end)
 
-local function isThisVehicle4Wheel(vehicleHash)
+local function isThisVehicleABike(vehicleHash)
     return VEHICLE.IS_THIS_MODEL_A_BIKE(vehicleHash) or VEHICLE.IS_THIS_MODEL_A_BICYCLE(vehicleHash)
 end
 
@@ -1164,7 +1181,7 @@ local enableOppressor2ModTriggered = false
 local lastVehicleOp2Spoof = nil
 local enableOp2Transform = false
 menu.toggle(vehicleFolder, 'Oppressor MK2 Mod' ,{"enableop2mod"}, 
-"This will allow you to fly on any bike or motorcycle like on Oppressor MK 2 \n(Button to switch the mode below)", function(toggle)
+"This will allow you to fly on any bike or motorcycle like on Oppressor MK 2 \n(Dosnt work on oppressor MK1) \n(Button to switch the mode below)", function(toggle)
     enableOppressor2Mod = toggle
     enableOppressor2ModTriggered = toggle
 end, enableOppressor2Mod)
@@ -1179,7 +1196,9 @@ onTick[#onTick+1] = function ()
     local playerEnbike = not isPlayerOnBike and PED.IS_PED_IN_ANY_VEHICLE(PLAYER.PLAYER_PED_ID(), false)
     local playerExbike = isPlayerOnBike and not PED.IS_PED_IN_ANY_VEHICLE(PLAYER.PLAYER_PED_ID(), false)
     isPlayerOnBike = PED.IS_PED_IN_ANY_VEHICLE(PLAYER.PLAYER_PED_ID(), false)
-    if onVehicleSpoofNeeded() then vehicleSpoofPatch(onVehicleSpoofNeeded()) end
+    if onVehicleSpoofNeeded() then 
+        vehicleSpoofPatch(onVehicleSpoofNeeded()) 
+    end
     enableOppressor2ModE = false
     if enableOppressor2Mod then
         if gVehicleState.vehicleChanged then
@@ -1211,19 +1230,28 @@ onTick[#onTick+1] = function ()
                 lastVehicleOp2Spoof = nil
             end
         end 
-        if (gVehicleState.vehicleChanged or playerEnbike or enableOppressor2ModTriggered or enableOp2Transform) and (not gVehicleState.currentPedVehiclePtr.isNil()) and isPlayerOnBike 
-        and gVehicleState.isCurrentVehicleEntry() and isThisVehicle4Wheel(ENTITY.GET_ENTITY_MODEL(gVehicleState.currentPedVehicleId)) 
-        and ENTITY.GET_ENTITY_MODEL(gVehicleState.currentPedVehicleId) ~= util.joaat("oppressor2") and enableOp2Transform then
+        if  (not gVehicleState.currentPedVehiclePtr.isNil()) and isPlayerOnBike 
+        and gVehicleState.isCurrentVehicleEntry() and isThisVehicleABike(ENTITY.GET_ENTITY_MODEL(gVehicleState.currentPedVehicleId)) 
+        and ENTITY.GET_ENTITY_MODEL(gVehicleState.currentPedVehicleId) ~= util.joaat("oppressor2") and ENTITY.GET_ENTITY_MODEL(gVehicleState.currentPedVehicleId) ~= util.joaat("oppressor") 
+        and enableOp2Transform then
             if lastVehicleOp2Spoof == nil then
-                lastVehicleOp2Spoof = Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x918):offset(0x158).readLong()
-                Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x918):offset(0x158):writeLong(Mem:new(VBPtr):offset(0xFF0):offset(0x158):readLong())
-                enableOppressor2ModTriggered = false
+                if playerEnvehicle and ENTITY.GET_ENTITY_MODEL(gVehicleState.lastPedVehicleId) == util.joaat("oppressor") then
+                    util.yield()
+                else
+                    vehicleSpoofPatch(true) 
+                    util.yield()
+                    lastVehicleOp2Spoof = Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x918):offset(0x158).readLong()
+                    Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x918):offset(0x158):writeLong(Mem:new(VBPtr):offset(0xFF0):offset(0x158):readLong())
+                    enableOppressor2ModTriggered = false
+                end
             end
         end
-        if ENTITY.GET_ENTITY_MODEL(gVehicleState.lastPedVehicleId) ~= util.joaat("oppressor2") and not enableOp2Transform then
+        if ENTITY.GET_ENTITY_MODEL(gVehicleState.lastPedVehicleId) ~= util.joaat("oppressor2") and ENTITY.GET_ENTITY_MODEL(gVehicleState.lastPedVehicleId) ~= util.joaat("oppressor") 
+        and not enableOp2Transform then
             if lastVehicleOp2Spoof ~= nil then
                 local engineWasOn = false
-                if ENTITY.DOES_ENTITY_EXIST(gVehicleState.lastPedVehicleId) and ENTITY.GET_ENTITY_MODEL(gVehicleState.lastPedVehicleId) ~= util.joaat("oppressor2") then
+                if ENTITY.DOES_ENTITY_EXIST(gVehicleState.lastPedVehicleId) and ENTITY.GET_ENTITY_MODEL(gVehicleState.lastPedVehicleId) ~= util.joaat("oppressor2") 
+                and ENTITY.GET_ENTITY_MODEL(gVehicleState.lastPedVehicleId) ~= util.joaat("oppressor") then
                     Mem:new(gVehicleState.lastPedVehicle + 0x362):writeShort(0x3D74)
                     util.yield()
                     Mem:new(gVehicleState.lastPedVehicle + 0x362):writeShort(0x0000)
