@@ -1,7 +1,48 @@
+--[[
+    This script was created by Parci-_-#9443(parci0_0).
+    The original download site should be https://github.com/Polyester-ak-Parci, if you got this script from anyone selling it, you got sadly scammed.
+]]
+
 natives_version = "1663599433"
 util.require_natives(natives_version)
+util.ensure_package_is_installed('lua/ScaleformLib')
 local json = require("json")
 
+local scaleform = require('ScaleformLib')
+local sf = scaleform('instructional_buttons')
+
+-- Auto update
+
+local response = false
+local localVer = 3.3
+local localKs = false
+async_http.init("raw.githubusercontent.com", "/Polyester-ak-Parci/Parci-_--Script-for-stand/main/ParciScript.lua", function(output)
+    currentVer = tonumber(output)
+    response = true
+    if localVer ~= currentVer then
+        util.toast("[Parci script] An update is available. Please reload the script to update it.")
+        menu.action(menu.my_root(), "Update Lua", {}, "", function()
+            async_http.init("raw.githubusercontent.com", "/Polyester-ak-Parci/Parci-_--Script-for-stand/main/ParciScript.lua",function(a)
+                local err = select(2,load(a))
+                if err then
+                    util.toast("There was an error, proceed to manually update using github.")
+                return end
+                local f = io.open(filesystem.scripts_dir()..SCRIPT_RELPATH, "wb")
+                f:write(a)
+                f:close()
+                util.toast("The script has been updated, restart the script :3")
+                util.restart_script()
+            end)
+            async_http.dispatch()
+        end)
+    end
+end, function() response = true end)
+async_http.dispatch()
+repeat 
+    util.yield()
+until response
+
+-- 
 
 local function memScan(name, pattern, callback)
     local addr = memory.scan(pattern)
@@ -292,6 +333,60 @@ function delete_object(model)
         end
     end
 end
+function request_anim_dict(dict)
+    request_time = os.time()
+    if not STREAMING.DOES_ANIM_DICT_EXIST(dict) then
+        return
+    end
+    STREAMING.REQUEST_ANIM_DICT(dict)
+    while not STREAMING.HAS_ANIM_DICT_LOADED(dict) do
+        if os.time() - request_time >= 10 then
+            break
+        end
+        util.yield()
+    end
+end
+
+function request_model_load(hash)
+    request_time = os.time()
+    if not STREAMING.IS_MODEL_VALID(hash) then
+        return
+    end
+    STREAMING.REQUEST_MODEL(hash)
+    while not STREAMING.HAS_MODEL_LOADED(hash) do
+        if os.time() - request_time >= 10 then
+            break
+        end
+        util.yield()
+    end
+end
+
+
+
+function Hudhide()
+    HUD.HIDE_HUD_COMPONENT_THIS_FRAME(6)
+    HUD.HIDE_HUD_COMPONENT_THIS_FRAME(7)
+    HUD.HIDE_HUD_COMPONENT_THIS_FRAME(8)
+    HUD.HIDE_HUD_COMPONENT_THIS_FRAME(9)
+---@diagnostic disable-next-line: param-type-mismatch
+    memory.write_int(memory.script_global(1645739+1121), 1)
+    sf.CLEAR_ALL()
+    sf.TOGGLE_MOUSE_BUTTONS(false)
+end
+
+
+function displayControls()
+    Hudhide()
+    sf.SET_DATA_SLOT(5,PAD.GET_CONTROL_INSTRUCTIONAL_BUTTONS_STRING(0, 34, true), 'Left')
+    sf.SET_DATA_SLOT(4,PAD.GET_CONTROL_INSTRUCTIONAL_BUTTONS_STRING(0, 35, true), 'Right')
+    sf.SET_DATA_SLOT(3,PAD.GET_CONTROL_INSTRUCTIONAL_BUTTONS_STRING(0, 33, true), 'Stop')
+    sf.SET_DATA_SLOT(2,PAD.GET_CONTROL_INSTRUCTIONAL_BUTTONS_STRING(0, 32, true), 'Forward')
+    sf.SET_DATA_SLOT(1,PAD.GET_CONTROL_INSTRUCTIONAL_BUTTONS_STRING(0, 21, true), 'Gallop')
+    sf.SET_DATA_SLOT(0,PAD.GET_CONTROL_INSTRUCTIONAL_BUTTONS_STRING(0, 23, true), 'Exit')
+    sf.DRAW_INSTRUCTIONAL_BUTTONS()
+    sf:draw_fullscreen()
+end
+
 
 -- Scan pointers
 
@@ -1417,6 +1512,158 @@ math.floor(round(memory.read_float(pedVehicleOffsetZPtr.get()), 100)*100), 0.1*1
     pedVehicleOffsetZPtr = Mem:new(CCamPtr):offset(0):offset(0x2C0):offset(0x210):offset(0x8C)
     capacity /= 100
     setPedVehicleZOffset(capacity)
+end)
+
+-- Anymal ride
+
+local active_rideable_animal = 0
+local attachedVehicle = nil
+local lastControlLR = false
+local creatingAnimalRide = false
+util.create_tick_handler(function()
+    if active_rideable_animal ~= 0 and not creatingAnimalRide then 
+        displayControls()
+
+        if PAD.IS_CONTROL_JUST_PRESSED(23, 23) then 
+            TASK.TASK_LEAVE_VEHICLE(players.user_ped(), attachedVehiclem, 0)
+            util.yield(2000)
+            TASK.TASK_GO_STRAIGHT_TO_COORD_RELATIVE_TO_ENTITY(active_rideable_animal, players.user_ped(), 0, -10, 0, 3.0, 4000, ENTITY.GET_ENTITY_HEADING(active_rideable_animal), 1)
+            util.yield(4000)
+            entities.delete_by_handle(active_rideable_animal)
+            entities.delete_by_handle(attachedVehicle)
+            active_rideable_animal = 0
+            attachedVehicle = nil
+            PED.SET_PED_CONFIG_FLAG(players.user_ped(), 380, false)
+        end
+
+        if attachedVehicle ~= nil then
+            VEHICLE.SET_VEHICLE_ENGINE_ON(attachedVehicle, false, true, true)
+            ENTITY.SET_ENTITY_INVINCIBLE(attachedVehicle, true);
+            ENTITY.SET_ENTITY_COLLISION(attachedVehicle, false, 0);
+            ENTITY.SET_ENTITY_VISIBLE(attachedVehicle, false, 0);
+            ENTITY.SET_ENTITY_VISIBLE(players.user_ped(), true, 0)
+
+            if not PED.GET_PED_CONFIG_FLAG(active_rideable_animal, 17, true) then
+				-- Flag 17 = PED_FLAG_BLOCK_NON_TEMPORARY_EVENTS
+				PED.SET_BLOCKING_OF_NON_TEMPORARY_EVENTS(pactive_rideable_animaled, true)
+				TASK.TASK_SET_BLOCKING_OF_NON_TEMPORARY_EVENTS(active_rideable_animal, true)
+            end
+            PED.SET_PED_CONFIG_FLAG(players.user_ped(), 380, true)
+        end
+        
+        if not ENTITY.IS_ENTITY_IN_AIR(active_rideable_animal) then 
+            if PAD.IS_CONTROL_PRESSED(32, 32) then 
+                local side_move = PAD.GET_CONTROL_NORMAL(146, 146)
+                local fwd = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(active_rideable_animal, side_move*20.0, 10.0, 0.0)
+                TASK.TASK_LOOK_AT_COORD(active_rideable_animal, fwd.x, fwd.y, fwd.z, 0, 0, 2)
+                
+                if PAD.IS_CONTROL_PRESSED(0, 21) then
+                    if side_move ~= 0 then
+                        PED.SET_PED_MOVE_RATE_OVERRIDE(active_rideable_animal, 1.7)
+                    else
+                        PED.SET_PED_MOVE_RATE_OVERRIDE(active_rideable_animal, 1)
+                    end
+                    TASK.TASK_GO_STRAIGHT_TO_COORD_RELATIVE_TO_ENTITY(active_rideable_animal, active_rideable_animal, side_move*3, 10, 0, 3, -1)
+                else
+                    if side_move ~= 0 then
+                        PED.SET_PED_MOVE_RATE_OVERRIDE(active_rideable_animal, 1.7)
+
+                    else
+                        PED.SET_PED_MOVE_RATE_OVERRIDE(active_rideable_animal, 1)
+                    end
+                    TASK.TASK_GO_STRAIGHT_TO_COORD_RELATIVE_TO_ENTITY(active_rideable_animal, active_rideable_animal, side_move*10, 10, 0, 2.3, -1)
+                end
+                lastControlLR = false
+            elseif PAD.IS_CONTROL_PRESSED(35, 35) then
+                PED.SET_PED_MOVE_RATE_OVERRIDE(active_rideable_animal, 1)
+                TASK.TASK_GO_STRAIGHT_TO_COORD_RELATIVE_TO_ENTITY(active_rideable_animal, active_rideable_animal, 10, 2, 0, 1.5, -1)
+                lastControlLR = true
+            elseif PAD.IS_CONTROL_PRESSED(34, 34) then
+                PED.SET_PED_MOVE_RATE_OVERRIDE(active_rideable_animal, 1)
+                TASK.TASK_GO_STRAIGHT_TO_COORD_RELATIVE_TO_ENTITY(active_rideable_animal, active_rideable_animal, -10, 2, 0, 1.5, -1)
+                lastControlLR = true
+            end
+            if PAD.IS_CONTROL_PRESSED(33, 33) then 
+                local fwd = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(active_rideable_animal, 0, 0.01, 0.0)
+                TASK.TASK_GO_STRAIGHT_TO_COORD(active_rideable_animal, fwd.x, fwd.y, fwd.z, 0.0, -1, ENTITY.GET_ENTITY_HEADING(active_rideable_animal), 0)
+                lastControlLR = false
+            end
+            if not (PAD.IS_CONTROL_PRESSED(35, 35) or PAD.IS_CONTROL_PRESSED(34, 34)) and lastControlLR then
+                local fwd = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(active_rideable_animal, 0, 0, 0.0)
+                TASK.TASK_GO_STRAIGHT_TO_COORD(active_rideable_animal, fwd.x, fwd.y, fwd.z, 0.0, -1, ENTITY.GET_ENTITY_HEADING(active_rideable_animal), 0)
+                lastControlLR = false
+            end
+        end
+    end
+end)
+
+
+local ranimal_hashes = {util.joaat("a_c_deer"), util.joaat("a_c_boar"), util.joaat("a_c_cow")}
+menu.list_action(menu.my_root() ,"Animal ride", {"rideableanimal"}, "", {"deer", "boar", "ox"}, function(index)
+    if active_rideable_animal ~= 0 then 
+        util.toast("Already riding animals")
+        return 
+    end
+    local hash = ranimal_hashes[index]
+    
+    request_model_load(hash)
+    creatingAnimalRide = true
+    local fwd = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(players.user_ped(), 1, -5.0, 0.0)
+    local groundz = memory.alloc(4)
+    MISC.GET_GROUND_Z_FOR_3D_COORD(fwd.x, fwd.y, fwd.z, groundz, 0, 0)
+    fwd.z = memory.read_float(groundz) or fwd.z 
+    local animal = entities.create_ped(8, hash, fwd, ENTITY.GET_ENTITY_HEADING(players.user_ped()))
+
+    ENTITY.SET_ENTITY_INVINCIBLE(animal, true)
+    ENTITY.FREEZE_ENTITY_POSITION(animal, true)
+    TASK.CLEAR_PED_TASKS(PLAYER.PLAYER_PED_ID())
+    PLAYER.SET_PLAYER_CONTROL(players.user(), false, 0)
+    active_rideable_animal = animal
+    local zoffset = 0 
+    local f_z_off = 0
+    local yoffset = 0
+    local xoffset = 0
+    local rotx = 0
+    pluto_switch index do 
+        case 1: 
+            zoffset = -0.35
+            xoffset = -0.1
+            rotx = -10
+            break
+        case 2:
+            rotx = -15
+            zoffset = -0.25
+            xoffset = -0.2
+            break
+        case 3:
+            zoffset = -0.35
+            xoffset = -0.2
+            rotx = -20
+            break
+    end
+    request_model_load(util.joaat("blazer4"))
+    local veh = entities.create_vehicle(util.joaat("blazer4"), players.get_position(players.user()), ENTITY.GET_ENTITY_HEADING(players.user_ped()))
+    attachedVehicle = veh
+    VEHICLE.SET_VEHICLE_ENGINE_ON(veh, false, true, false)
+    ENTITY.SET_ENTITY_INVINCIBLE(veh, true);
+    ENTITY.SET_ENTITY_COLLISION(veh, false, 0);
+    ENTITY.SET_ENTITY_VISIBLE(veh, false, 0);
+    ENTITY.ATTACH_ENTITY_TO_ENTITY(veh, animal, PED.GET_PED_BONE_INDEX(animal, 24816), xoffset, yoffset, zoffset, rotx, 0.0, -90.0, false, false, false, true, 2, true)
+    ENTITY.FREEZE_ENTITY_POSITION(animal, false)
+    
+    PED.SET_PED_CONFIG_FLAG(players.user_ped(), 380, true)
+    TASK.TASK_GO_STRAIGHT_TO_COORD_RELATIVE_TO_ENTITY(animal, players.user_ped(), 1, 0, 0, 3.0, 4000, ENTITY.GET_ENTITY_HEADING(active_rideable_animal), 1)
+    util.yield(2000)
+    ENTITY.FREEZE_ENTITY_POSITION(players.user_ped(), false)
+    TASK.TASK_ENTER_VEHICLE(players.user_ped(), veh, 1700, -1, 1, 1, 0)
+    util.yield(3000)
+    if not PED.IS_PED_IN_VEHICLE(players.user_ped(), veh, false) then
+        PED.SET_PED_INTO_VEHICLE(players.user_ped(), veh, -1)
+    end
+    ENTITY.FREEZE_ENTITY_POSITION(animal, false)
+    ENTITY.FREEZE_ENTITY_POSITION(players.user_ped(), false)
+    PLAYER.SET_PLAYER_CONTROL(players.user(), true, 0)
+    creatingAnimalRide = false
 end)
 
 -- Localisation options
