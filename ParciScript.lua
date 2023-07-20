@@ -14,7 +14,7 @@ local sf = scaleform('instructional_buttons')
 -- Auto update
 
 local response = false
-local localVer = "0.2.2"
+local localVer = "0.2.3"
 local localKs = false
 async_http.init("raw.githubusercontent.com", "/Polyester-ak-Parci/Parci-_--Script-for-stand/main/ParciScriptVersion.lua", function(output)
     currentVer = output
@@ -1514,7 +1514,7 @@ math.floor(round(memory.read_float(pedVehicleOffsetZPtr.get()), 100)*100), 0.1*1
     setPedVehicleZOffset(capacity)
 end)
 
--- Anymal ride
+-- Animal ride
 
 local active_rideable_animal = 0
 local attachedVehicle = nil
@@ -1523,6 +1523,15 @@ local creatingAnimalRide = false
 util.create_tick_handler(function()
     if active_rideable_animal ~= 0 and not creatingAnimalRide then 
         displayControls()
+
+        if not PED.IS_PED_IN_VEHICLE(players.user_ped(), attachedVehicle, true) then
+            util.yield(10000)
+            entities.delete_by_handle(active_rideable_animal)
+            entities.delete_by_handle(attachedVehicle)
+            active_rideable_animal = 0
+            attachedVehicle = nil
+            PED.SET_PED_CONFIG_FLAG(players.user_ped(), 380, false)
+        end
 
         if PAD.IS_CONTROL_JUST_PRESSED(23, 23) then 
             TASK.TASK_LEAVE_VEHICLE(players.user_ped(), attachedVehiclem, 0)
