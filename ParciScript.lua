@@ -14,11 +14,10 @@ local sf = scaleform('instructional_buttons')
 -- Auto update
 
 local response = false
-local localVer = "0.2.1b2"
+local localVer = "0.2.1b4"
 local localKs = false
 async_http.init("raw.githubusercontent.com", "/Polyester-ak-Parci/Parci-_--Script-for-stand/main/ParciScriptVersion.lua", function(output)
-    util.toast("[" .. output .. "] " .. (localVer == currentVer) .. " [" .. localVer .. "]")
-    currentVer = tonumber(output)
+    currentVer = output
     response = true
     if localVer ~= currentVer then
         util.toast("[Parci script] An update is available. Please reload the script to update it.")
