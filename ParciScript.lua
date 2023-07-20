@@ -14,7 +14,7 @@ local sf = scaleform('instructional_buttons')
 -- Auto update
 
 local response = false
-local localVer = "0.2.3"
+local localVer = "0.2.4"
 local localKs = false
 async_http.init("raw.githubusercontent.com", "/Polyester-ak-Parci/Parci-_--Script-for-stand/main/ParciScriptVersion.lua", function(output)
     currentVer = output
@@ -1654,9 +1654,9 @@ menu.list_action(menu.my_root() ,"Animal ride", {"rideableanimal"}, "", {"deer",
     local veh = entities.create_vehicle(util.joaat("blazer4"), players.get_position(players.user()), ENTITY.GET_ENTITY_HEADING(players.user_ped()))
     attachedVehicle = veh
     VEHICLE.SET_VEHICLE_ENGINE_ON(veh, false, true, false)
-    ENTITY.SET_ENTITY_INVINCIBLE(veh, true);
-    ENTITY.SET_ENTITY_COLLISION(veh, false, 0);
-    ENTITY.SET_ENTITY_VISIBLE(veh, false, 0);
+    ENTITY.SET_ENTITY_INVINCIBLE(veh, true)
+    ENTITY.SET_ENTITY_COLLISION(veh, false, 0)
+    ENTITY.SET_ENTITY_ALPHA(veh, 0, true)
     ENTITY.ATTACH_ENTITY_TO_ENTITY(veh, animal, PED.GET_PED_BONE_INDEX(animal, 24816), xoffset, yoffset, zoffset, rotx, 0.0, -90.0, false, false, false, true, 2, true)
     ENTITY.FREEZE_ENTITY_POSITION(animal, false)
     
@@ -1672,6 +1672,8 @@ menu.list_action(menu.my_root() ,"Animal ride", {"rideableanimal"}, "", {"deer",
     ENTITY.FREEZE_ENTITY_POSITION(animal, false)
     ENTITY.FREEZE_ENTITY_POSITION(players.user_ped(), false)
     PLAYER.SET_PLAYER_CONTROL(players.user(), true, 0)
+    ENTITY.SET_ENTITY_VISIBLE(veh, false, 0)
+    ENTITY.SET_ENTITY_VISIBLE(players.user(), true, 0)
     creatingAnimalRide = false
 end)
 
