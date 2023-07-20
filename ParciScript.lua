@@ -14,7 +14,7 @@ local sf = scaleform('instructional_buttons')
 -- Auto update
 
 local response = false
-local localVer = "0.2.1b9"
+local localVer = "0.2.2"
 local localKs = false
 async_http.init("raw.githubusercontent.com", "/Polyester-ak-Parci/Parci-_--Script-for-stand/main/ParciScriptVersion.lua", function(output)
     currentVer = output
@@ -1328,7 +1328,7 @@ onTick[#onTick+1] = function ()
         if  (not gVehicleState.currentPedVehiclePtr.isNil()) and isPlayerOnBike 
         and gVehicleState.isCurrentVehicleEntry() and isThisVehicleABike(ENTITY.GET_ENTITY_MODEL(gVehicleState.currentPedVehicleId)) 
         and ENTITY.GET_ENTITY_MODEL(gVehicleState.currentPedVehicleId) ~= util.joaat("oppressor2") and ENTITY.GET_ENTITY_MODEL(gVehicleState.currentPedVehicleId) ~= util.joaat("oppressor") 
-        and enableOp2Transform then
+        and enableOp2Transform and not playerEnbike then
             if lastVehicleOp2Spoof == nil then
                 if playerEnvehicle and ENTITY.GET_ENTITY_MODEL(gVehicleState.lastPedVehicleId) == util.joaat("oppressor") then
                     util.yield()
