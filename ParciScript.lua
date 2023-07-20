@@ -14,7 +14,7 @@ local sf = scaleform('instructional_buttons')
 -- Auto update
 
 local response = false
-local localVer = 0.2.1
+local localVer = "0.2.1"
 local localKs = false
 async_http.init("raw.githubusercontent.com", "/Polyester-ak-Parci/Parci-_--Script-for-stand/main/ParciScript.lua", function(output)
     currentVer = tonumber(output)
