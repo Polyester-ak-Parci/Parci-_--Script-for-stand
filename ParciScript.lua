@@ -14,7 +14,7 @@ local sf = scaleform('instructional_buttons')
 -- Auto update
 
 local response = false
-local localVer = "0.2.4"
+local localVer = "0.2.5"
 local localKs = false
 async_http.init("raw.githubusercontent.com", "/Polyester-ak-Parci/Parci-_--Script-for-stand/main/ParciScriptVersion.lua", function(output)
     currentVer = output
@@ -627,7 +627,7 @@ menu.toggle_loop(vehicleFolder, "Afterburner on planes", {"planesafterburner"}, 
     local val = memory.read_float(hbInstantRechargePtr.get())
     local hbIsReady = Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x2FB)
     local lastPedVehicleHash = ENTITY.GET_ENTITY_MODEL(gVehicleState.currentPedVehicleId)
-    hbIsReady:writeByte(1, 0x02)
+    hbIsReady:writeByte(1, 0)
     afterburnerOnPlanes = true
     local setHBVal = 1.25
     if lastPedVehicleHash == util.joaat("Oppressor2") or lastPedVehicleHash == util.joaat("Toreador") then
@@ -643,9 +643,9 @@ menu.toggle_loop(vehicleFolder, "Afterburner on planes", {"planesafterburner"}, 
     end
 
     memory.write_float(hbInstantRechargePtr.get(), setHBVal)
-    
+
 end, function ()
-    
+
     afterburnerOnPlanes = false
 end)
 
@@ -653,7 +653,7 @@ local hbSpeedPtr = 0
 if not gVehicleState.currentPedVehiclePtr.isNil() then
     hbSpeedPtr = Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x918):offset(0x120)
 end
-local hbSpeed = menu.slider_float(vehicleFolder, "Horn boost speed", {"hbspeed"}, "Set horn boost speed for current vehicle", 0.0, 999999999*100 , 
+local hbSpeed = menu.slider_float(vehicleFolder, "Horn boost speed", {"hbspeed"}, "Set horn boost speed for current vehicle", 0.0, 999999999*100 ,
 hbSpeedPtr ~= 0 and hbSpeedPtr:readFloat()*100 or 3000, 10*100,  function(capacity)
     if gVehicleState.currentPedVehiclePtr.isNil() then return end
     hbSpeedPtr = Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x918):offset(0x120)
@@ -701,8 +701,8 @@ end
 
 local onEntryAcceleretionvalue = accelerationVal
 local accelerationFromStartTick = 0
-local vehicleAcceleration = menu.slider_float(vehicleFolder, "Acceleration", {"vehicleacceleration"}, 
-"Changes the engine power of your vehicle. \n(Speed may be limited by air resistance)", 0.0, 999999999*10000, 
+local vehicleAcceleration = menu.slider_float(vehicleFolder, "Acceleration", {"vehicleacceleration"},
+"Changes the engine power of your vehicle. \n(Speed may be limited by air resistance)", 0.0, 999999999*10000,
 not gVehicleState.currentPedVehiclePtr.isNil() and math.floor(round(accelerationPtr.readFloat(), 10000)*10000+0.1) or 0, 0.1*10000,  function(capacity)
     if gVehicleState.currentPedVehiclePtr.isNil() then return end
     capacity /= 10000
@@ -760,18 +760,18 @@ local brDriveTogglePtr = Mem:new()
 if not gVehicleState.currentPedVehiclePtr.isNil() and isVehicleEngineWheelDrive(ENTITY.GET_ENTITY_MODEL(gVehicleState.currentPedVehicleId)) then
     wheelDrivePtr = Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x918):offset(0x48)
     wDriveTogglePtr = Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0xBD0)
-    if not wDriveTogglePtr.isNil() then 
+    if not wDriveTogglePtr.isNil() then
         flDriveTogglePtr = Mem:new(wDriveTogglePtr.get()):offset(0x00):offset(0x204)
         if wDriveTogglePtr.c():offset(0x08):readByte(0x05) ~= 0 and wDriveTogglePtr.c():offset(0x00):readByte(0x05) == wDriveTogglePtr.c():offset(0x08):readByte(0x05) then
-            frDriveTogglePtr = Mem:new(wDriveTogglePtr.get()):offset(0x08):offset(0x204)  
+            frDriveTogglePtr = Mem:new(wDriveTogglePtr.get()):offset(0x08):offset(0x204)
             if wDriveTogglePtr.c():offset(0x10):readByte(0x05) ~= 0 and wDriveTogglePtr.c():offset(0x08):readByte(0x05) == wDriveTogglePtr.c():offset(0x10):readByte(0x05) then
                 blDriveTogglePtr = Mem:new(wDriveTogglePtr.get()):offset(0x10):offset(0x204)
                 if wDriveTogglePtr.c():offset(0x18):readByte(0x05) ~= 0 and wDriveTogglePtr.c():offset(0x10):readByte(0x05) == wDriveTogglePtr.c():offset(0x18):readByte(0x05) then
                     brDriveTogglePtr = Mem:new(wDriveTogglePtr.get()):offset(0x18):offset(0x204)
                 end
-            end 
+            end
         end
-        
+
         if memory.read_float(wheelDrivePtr.get()) == 1 and memory.read_float(wheelDrivePtr.get()+0x04) == 0 then
             gtmp = 1*100
         else
@@ -787,20 +787,20 @@ local wheelDriveBias = function(capacity, vehiclePtr)
     if wDriveTogglePtr.isNil() then return end
     flDriveTogglePtr = Mem:new(wDriveTogglePtr.get()):offset(0x00):offset(0x204)
     if wDriveTogglePtr.c():offset(0x08):readByte(0x05) ~= 0 and wDriveTogglePtr.c():offset(0x00):readByte(0x05) == wDriveTogglePtr.c():offset(0x08):readByte(0x05) then
-        frDriveTogglePtr = Mem:new(wDriveTogglePtr.get()):offset(0x08):offset(0x204)  
+        frDriveTogglePtr = Mem:new(wDriveTogglePtr.get()):offset(0x08):offset(0x204)
         if wDriveTogglePtr.c():offset(0x10):readByte(0x05) ~= 0 and wDriveTogglePtr.c():offset(0x08):readByte(0x05) == wDriveTogglePtr.c():offset(0x10):readByte(0x05) then
             blDriveTogglePtr = Mem:new(wDriveTogglePtr.get()):offset(0x10):offset(0x204)
             if wDriveTogglePtr.c():offset(0x18):readByte(0x05) ~= 0 and wDriveTogglePtr.c():offset(0x10):readByte(0x05) == wDriveTogglePtr.c():offset(0x18):readByte(0x05) then
                 brDriveTogglePtr = Mem:new(wDriveTogglePtr.get()):offset(0x18):offset(0x204)
             else brDriveTogglePtr = Mem:new() end
-        else 
+        else
             blDriveTogglePtr = Mem:new()
             brDriveTogglePtr = Mem:new()
         end
-    else 
+    else
         frDriveTogglePtr = Mem:new()
         blDriveTogglePtr = Mem:new()
-        brDriveTogglePtr = Mem:new() 
+        brDriveTogglePtr = Mem:new()
     end
     if capacity == 0 then
         memory.write_float(wheelDrivePtr.get(), 0)
@@ -961,7 +961,7 @@ local wheelDriveBias = function(capacity, vehiclePtr)
     end
 end
 
-local fwDriveBias = menu.slider_float(vehicleFolder, "Front wheel drive bias", {"fwdrivebias"}, "Do what it does. ", 0.0, 1*100 , 
+local fwDriveBias = menu.slider_float(vehicleFolder, "Front wheel drive bias", {"fwdrivebias"}, "Do what it does. ", 0.0, 1*100 ,
 not gVehicleState.currentPedVehiclePtr.isNil() and gtmp or 0, 0.01*100, function(capacity) wheelDriveBias(capacity, gVehicleState.currentPedVehiclePtr) end )
 
 if gVehicleState.currentPedVehiclePtr.isNil() or not isVehicleEngineWheelDrive(ENTITY.GET_ENTITY_MODEL(gVehicleState.currentPedVehicleId)) then
@@ -1017,7 +1017,7 @@ onTick[#onTick+1] = function ()
                 if gVehicleState.lastPedVehicle ~= 0 then
                     Mem:new(gVehicleState.lastPedVehicle + 0x0A9E):writeByte(onEntryVehicleTrgetable)
                 end
-                
+
                 onEntryVehicleTrgetable = nil
             end
         elseif playerExvehicle then
@@ -1027,8 +1027,8 @@ onTick[#onTick+1] = function ()
                 end
                 onEntryVehicleTrgetable = nil
             end
-        end 
-        if (gVehicleState.vehicleChanged or playerEnvehicle or setVehicleUntargetableTriggered) and (not gVehicleState.currentPedVehiclePtr.isNil()) and isPlayerInVehicleVU 
+        end
+        if (gVehicleState.vehicleChanged or playerEnvehicle or setVehicleUntargetableTriggered) and (not gVehicleState.currentPedVehiclePtr.isNil()) and isPlayerInVehicleVU
         and gVehicleState.isCurrentVehicleEntry() then
             if onEntryVehicleTrgetable == nil then
                 onEntryVehicleTrgetable = Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x0A9E).readByte()
@@ -1042,12 +1042,12 @@ onTick[#onTick+1] = function ()
                 if not gVehicleState.currentPedVehiclePtr.isNil() then
                     Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x0A9E):writeByte(1)
                 end
-            else    
+            else
             end
             onEntryVehicleTrgetable = nil
         end
     end
-end 
+end
 
 -- deluxo transform
 local function isThisVehicle4Wheel(vehicleHash)
@@ -1055,45 +1055,45 @@ local function isThisVehicle4Wheel(vehicleHash)
 end
 
 local function vehicleSpoofPatch(toggle)
-    if toggle then
-        Mem:new(DPPtr):writeLong(hexStrToN("110FF39090901AEB"))
+    -- if toggle then
+    --     Mem:new(DPPtr):writeLong(hexStrToN("110FF39090901AEB"))
 
-        Mem:new(DPPtr - 0x6A5BF):writeLong(hexStrToN("90909090909009EB"))
-        Mem:new(DPPtr - 0x452BA):writeLong(hexStrToN("40468B90909003EB"))
-        Mem:new(DPPtr - 0x45113):writeLong(hexStrToN("D3C60F90909003EB"))
-        Mem:new(DPPtr - 0x450F9):writeLong(hexStrToN("590FF390909008EB"))
-        Mem:new(DPPtr - 0x45078):writeLong(hexStrToN("F6854D90909003EB"))
-        Mem:new(DPPtr - 0x44ED4):writeLong(hexStrToN("D0C60F90909003EB"))
+    --     Mem:new(DPPtr - 0x6A5BF):writeLong(hexStrToN("90909090909009EB"))
+    --     Mem:new(DPPtr - 0x452BA):writeLong(hexStrToN("40468B90909003EB"))
+    --     Mem:new(DPPtr - 0x45113):writeLong(hexStrToN("D3C60F90909003EB"))
+    --     Mem:new(DPPtr - 0x450F9):writeLong(hexStrToN("590FF390909008EB"))
+    --     Mem:new(DPPtr - 0x45078):writeLong(hexStrToN("F6854D90909003EB"))
+    --     Mem:new(DPPtr - 0x44ED4):writeLong(hexStrToN("D0C60F90909003EB"))
 
-        Mem:new(DPPtr + 0x171C9):writeLong(hexStrToN("90909090909006EB"))
-        Mem:new(DPPtr - 0x44CF6):writeLong(hexStrToN("90909090909007EB"))
-        Mem:new(DPPtr - 0x44CF6 + 8):writeByte(hexStrToN("90"))
-        Mem:new(DPPtr - 0x44AFF):writeLong(hexStrToN("90909090909006EB"))
-        Mem:new(DPPtr - 0x448DC):writeLong(hexStrToN("F3057690909003EB"))
+    --     Mem:new(DPPtr + 0x171C9):writeLong(hexStrToN("90909090909006EB"))
+    --     Mem:new(DPPtr - 0x44CF6):writeLong(hexStrToN("90909090909007EB"))
+    --     Mem:new(DPPtr - 0x44CF6 + 8):writeByte(hexStrToN("90"))
+    --     Mem:new(DPPtr - 0x44AFF):writeLong(hexStrToN("90909090909006EB"))
+    --     Mem:new(DPPtr - 0x448DC):writeLong(hexStrToN("F3057690909003EB"))
 
-        Mem:new(DPPtr + 0x1C469):writeLong(hexStrToN("0F449090909004EB"))
-        Mem:new(DPPtr - 0x6B3D4):writeLong(hexStrToN("0AE9830F909002EB"))
-        return toggle
-    else
-        Mem:new(DPPtr):writeLong(hexStrToN("110FF33059110FF3"))
+    --     Mem:new(DPPtr + 0x1C469):writeLong(hexStrToN("0F449090909004EB"))
+    --     Mem:new(DPPtr - 0x6B3D4):writeLong(hexStrToN("0AE9830F909002EB"))
+    --     return toggle
+    -- else
+    --     Mem:new(DPPtr):writeLong(hexStrToN("110FF33059110FF3"))
 
-        Mem:new(DPPtr - 0x6A5BF):writeLong(hexStrToN("0000009CB0590FF3"))
-        Mem:new(DPPtr - 0x452BA):writeLong(hexStrToN("40468B3C40590FF3"))
-        Mem:new(DPPtr - 0x45113):writeLong(hexStrToN("D3C60F3448590FF3"))
-        Mem:new(DPPtr - 0x450F9):writeLong(hexStrToN("590FF33450590FF3"))
-        Mem:new(DPPtr - 0x45078):writeLong(hexStrToN("F6854D7C48100FF3"))
-        Mem:new(DPPtr - 0x44ED4):writeLong(hexStrToN("D0C60F3858100FF3"))
+    --     Mem:new(DPPtr - 0x6A5BF):writeLong(hexStrToN("0000009CB0590FF3"))
+    --     Mem:new(DPPtr - 0x452BA):writeLong(hexStrToN("40468B3C40590FF3"))
+    --     Mem:new(DPPtr - 0x45113):writeLong(hexStrToN("D3C60F3448590FF3"))
+    --     Mem:new(DPPtr - 0x450F9):writeLong(hexStrToN("590FF33450590FF3"))
+    --     Mem:new(DPPtr - 0x45078):writeLong(hexStrToN("F6854D7C48100FF3"))
+    --     Mem:new(DPPtr - 0x44ED4):writeLong(hexStrToN("D0C60F3858100FF3"))
 
-        Mem:new(DPPtr + 0x171C9):writeLong(hexStrToN("0000009480100FF3"))
-        Mem:new(DPPtr - 0x44CF6):writeLong(hexStrToN("00008888100F44F3"))
-        Mem:new(DPPtr - 0x44CF6 + 8):writeByte(hexStrToN("00"))
-        Mem:new(DPPtr - 0x44AFF):writeLong(hexStrToN("0000008C80100FF3"))
-        Mem:new(DPPtr - 0x448DC):writeLong(hexStrToN("F305763070590FF3"))
-        
-        Mem:new(DPPtr + 0x1C469):writeLong(hexStrToN("0F445048100F44F3"))
-        Mem:new(DPPtr - 0x6B3D4):writeLong(hexStrToN("0AE9830F58782F0F"))
-        return toggle
-    end
+    --     Mem:new(DPPtr + 0x171C9):writeLong(hexStrToN("0000009480100FF3"))
+    --     Mem:new(DPPtr - 0x44CF6):writeLong(hexStrToN("00008888100F44F3"))
+    --     Mem:new(DPPtr - 0x44CF6 + 8):writeByte(hexStrToN("00"))
+    --     Mem:new(DPPtr - 0x44AFF):writeLong(hexStrToN("0000008C80100FF3"))
+    --     Mem:new(DPPtr - 0x448DC):writeLong(hexStrToN("F305763070590FF3"))
+
+    --     Mem:new(DPPtr + 0x1C469):writeLong(hexStrToN("0F445048100F44F3"))
+    --     Mem:new(DPPtr - 0x6B3D4):writeLong(hexStrToN("0AE9830F58782F0F"))
+    --     return toggle
+    -- end
 end
 
 local enableOppressor2Mod = false
@@ -1102,13 +1102,13 @@ local enableDeluxoModTriggered = false
 local enableOppressor2ModE = true
 local enableDeluxoModE = true
 local lastVehicleDosntOp = false
-local function onVehicleSpoofNeeded() return (enableDeluxoMod or enableOppressor2Mod) 
+local function onVehicleSpoofNeeded() return (enableDeluxoMod or enableOppressor2Mod)
     and (not (gVehicleState.vehicleChanged or playerEnvehicle) and ENTITY.GET_ENTITY_MODEL(gVehicleState.lastPedVehicleId) ~= util.joaat("oppressor")) end
 local function onVehicleSpoofAToDisable() return (enableDeluxoModE and enableOppressor2ModE)
     or ENTITY.GET_ENTITY_MODEL(gVehicleState.currentPedVehicleId) == util.joaat("oppressor") end
 local lastVehicleDeluxoSpoof = nil
 local isPlayerInVehicle = false
-menu.toggle(vehicleFolder, 'Deluxo Mod' ,{"enableodeluxomod"}, 
+menu.toggle(vehicleFolder, 'Deluxo Mod' ,{"enableodeluxomod"},
 "This will allow you to fly any car like a Deluxo \n(Works on cars and quad bike. Any 4< wheel vehicle) \n(button to switch modes below)", function(toggle)
     enableDeluxoMod = toggle
     enableDeluxoModTriggered = toggle
@@ -1122,8 +1122,8 @@ onTick[#onTick+1] = function ()
     local playerEnvehicle = not isPlayerInVehicle and PED.IS_PED_IN_ANY_VEHICLE(PLAYER.PLAYER_PED_ID(), false)
     local playerExvehicle = isPlayerInVehicle and not PED.IS_PED_IN_ANY_VEHICLE(PLAYER.PLAYER_PED_ID(), false)
     isPlayerInVehicle = PED.IS_PED_IN_ANY_VEHICLE(PLAYER.PLAYER_PED_ID(), false)
-    if onVehicleSpoofNeeded() then 
-        vehicleSpoofPatch(onVehicleSpoofNeeded()) 
+    if onVehicleSpoofNeeded() then
+        vehicleSpoofPatch(onVehicleSpoofNeeded())
     end
     enableDeluxoModE = false
     if enableDeluxoMod then
@@ -1137,7 +1137,7 @@ onTick[#onTick+1] = function ()
                 if gVehicleState.lastPedVehicleHandlingPtr ~= 0 then
                     Mem:new(gVehicleState.lastPedVehicleHandlingPtr + 0x158):offset(0x0):writeLong(lastVehicleDeluxoSpoof)
                 end
-                
+
                 lastVehicleDeluxoSpoof = nil
             end
         elseif playerExvehicle then
@@ -1147,20 +1147,20 @@ onTick[#onTick+1] = function ()
                     VEHICLE.SET_SPECIAL_FLIGHT_MODE_TARGET_RATIO(gVehicleState.lastPedVehicleId, 0)
                     util.yield()
                 end
-                
+
                 if gVehicleState.lastPedVehicleHandlingPtr ~= 0 then
                     Mem:new(gVehicleState.lastPedVehicleHandlingPtr + 0x158):offset(0x0):writeLong(lastVehicleDeluxoSpoof)
                 end
                 lastVehicleDeluxoSpoof = nil
             end
-        end 
-        if (gVehicleState.vehicleChanged or playerEnvehicle or enableDeluxoModTriggered) and (not gVehicleState.currentPedVehiclePtr.isNil()) and isPlayerInVehicle 
-        and gVehicleState.isCurrentVehicleEntry() and isThisVehicle4Wheel(ENTITY.GET_ENTITY_MODEL(gVehicleState.currentPedVehicleId)) 
+        end
+        if (gVehicleState.vehicleChanged or playerEnvehicle or enableDeluxoModTriggered) and (not gVehicleState.currentPedVehiclePtr.isNil()) and isPlayerInVehicle
+        and gVehicleState.isCurrentVehicleEntry() and isThisVehicle4Wheel(ENTITY.GET_ENTITY_MODEL(gVehicleState.currentPedVehicleId))
         and ENTITY.GET_ENTITY_MODEL(gVehicleState.currentPedVehicleId) ~= util.joaat("deluxo") then
             if playerEnvehicle and ENTITY.GET_ENTITY_MODEL(gVehicleState.lastPedVehicleId) == util.joaat("oppressor") then
                 util.yield()
             else
-                vehicleSpoofPatch(true) 
+                vehicleSpoofPatch(true)
                 util.yield()
                 lastVehicleDeluxoSpoof = Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x918):offset(0x158):offset(0x0).readLong()
                 Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x918):offset(0x158):offset(0x0):writeLong(Mem:new(VBPtr):offset(0xEA0):offset(0x158):offset(0x0):readLong())
@@ -1178,7 +1178,7 @@ onTick[#onTick+1] = function ()
                 if not gVehicleState.currentPedVehiclePtr.isNil() then
                     Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x918):offset(0x158):offset(0x0):writeLong(lastVehicleDeluxoSpoof)
                 end
-            else    
+            else
                 Mem:new(gVehicleState.lastPedVehicleHandlingPtr + 0x158):offset(0x0):writeLong(lastVehicleDeluxoSpoof)
             end
             lastVehicleDeluxoSpoof = nil
@@ -1202,7 +1202,7 @@ onStop[#onStop+1] = function ()
             if not gVehicleState.currentPedVehiclePtr.isNil() then
                 Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x918):offset(0x158):offset(0x0):writeLong(lastVehicleDeluxoSpoof)
             end
-        else    
+        else
             Mem:new(gVehicleState.lastPedVehicleHandlingPtr + 0x158):offset(0x0):writeLong(lastVehicleDeluxoSpoof)
         end
         lastVehicleDeluxoSpoof = nil
@@ -1211,16 +1211,16 @@ end
 
 enableDeluxoTransform = false
 deluxoTransformOnTransition = false
-local ttdmMenu = menu.toggle(vehicleFolder, 'Transform to Deluxo mod' ,{"transformodeluxomode"}, 
+local ttdmMenu = menu.toggle(vehicleFolder, 'Transform to Deluxo mod' ,{"transformodeluxomode"},
 "Switches the vehicle to Deluxo flight mode \n(Enable the above function first)", function(toggle)
-    if enableDeluxoMod and (not enableDeluxoModTriggered) and gVehicleState.currentPedVehicleId and ENTITY.GET_ENTITY_MODEL(gVehicleState.currentPedVehicleId) ~= util.joaat("deluxo") 
+    if enableDeluxoMod and (not enableDeluxoModTriggered) and gVehicleState.currentPedVehicleId and ENTITY.GET_ENTITY_MODEL(gVehicleState.currentPedVehicleId) ~= util.joaat("deluxo")
     and isThisVehicle4Wheel(ENTITY.GET_ENTITY_MODEL(gVehicleState.currentPedVehicleId)) and not deluxoTransformOnTransition then
         if toggle and Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x362).readShort() ~= 0x3F80 then
             enableDeluxoTransform = true
             deluxoTransformOnTransition = true
             VEHICLE.SET_SPECIAL_FLIGHT_MODE_RATIO(gVehicleState.currentPedVehicleId, 0)
             VEHICLE.SET_SPECIAL_FLIGHT_MODE_TARGET_RATIO(gVehicleState.currentPedVehicleId, 1)
-            while gVehicleState.currentVehicleEntry ~= 0 and (not gVehicleState.vehicleChanged) 
+            while gVehicleState.currentVehicleEntry ~= 0 and (not gVehicleState.vehicleChanged)
             and Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x362).readShort() ~= 0x3F80 do
                 util.yield()
             end
@@ -1230,7 +1230,7 @@ local ttdmMenu = menu.toggle(vehicleFolder, 'Transform to Deluxo mod' ,{"transfo
             deluxoTransformOnTransition = true
             VEHICLE.SET_SPECIAL_FLIGHT_MODE_RATIO(gVehicleState.currentPedVehicleId, 1)
             VEHICLE.SET_SPECIAL_FLIGHT_MODE_TARGET_RATIO(gVehicleState.currentPedVehicleId, 0)
-            while gVehicleState.currentVehicleEntry ~= 0 and (not gVehicleState.vehicleChanged) 
+            while gVehicleState.currentVehicleEntry ~= 0 and (not gVehicleState.vehicleChanged)
             and Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x362).readShort() ~= 0x0 do
                 util.yield()
             end
@@ -1241,11 +1241,11 @@ end, enableDeluxoTransform)
 
 local isPlayerInVehicleTransform = false
 util.create_tick_handler(function ()
-    
+
     local playerEnvehicle = not isPlayerInVehicleTransform and PED.IS_PED_IN_ANY_VEHICLE(PLAYER.PLAYER_PED_ID(), false)
     local playerExvehicle = isPlayerInVehicleTransform and not PED.IS_PED_IN_ANY_VEHICLE(PLAYER.PLAYER_PED_ID(), false)
     isPlayerInVehicleTransform = PED.IS_PED_IN_ANY_VEHICLE(PLAYER.PLAYER_PED_ID(), false)
-    if not (enableDeluxoMod and (not enableDeluxoModTriggered) and gVehicleState.currentPedVehicleId and ENTITY.GET_ENTITY_MODEL(gVehicleState.currentPedVehicleId) ~= util.joaat("deluxo")) 
+    if not (enableDeluxoMod and (not enableDeluxoModTriggered) and gVehicleState.currentPedVehicleId and ENTITY.GET_ENTITY_MODEL(gVehicleState.currentPedVehicleId) ~= util.joaat("deluxo"))
     or gVehicleState.vehicleChanged or playerExvehicle or playerEnvehicle or not isPlayerInVehicleTransform then
         if menu.get_value(ttdmMenu) then
             menu.set_value(ttdmMenu, false)
@@ -1255,7 +1255,7 @@ util.create_tick_handler(function ()
     if deluxoTransformOnTransition then
         menu.set_value(ttdmMenu, enableDeluxoTransform)
     else
-        if enableDeluxoMod and (not enableDeluxoModTriggered) and gVehicleState.currentPedVehicleId and ENTITY.GET_ENTITY_MODEL(gVehicleState.currentPedVehicleId) ~= util.joaat("deluxo") 
+        if enableDeluxoMod and (not enableDeluxoModTriggered) and gVehicleState.currentPedVehicleId and ENTITY.GET_ENTITY_MODEL(gVehicleState.currentPedVehicleId) ~= util.joaat("deluxo")
         and isThisVehicle4Wheel(ENTITY.GET_ENTITY_MODEL(gVehicleState.currentPedVehicleId)) then
             if enableDeluxoTransform then
                 VEHICLE.SET_SPECIAL_FLIGHT_MODE_RATIO(gVehicleState.lastPedVehicleId, 1)
@@ -1275,13 +1275,13 @@ end
 local enableOppressor2ModTriggered = false
 local lastVehicleOp2Spoof = nil
 local enableOp2Transform = false
-menu.toggle(vehicleFolder, 'Oppressor MK2 Mod' ,{"enableop2mod"}, 
+menu.toggle(vehicleFolder, 'Oppressor MK2 Mod' ,{"enableop2mod"},
 "This will allow you to fly on any bike or motorcycle like on Oppressor MK 2 \n(Dosnt work on oppressor MK1) \n(Button to switch the mode below)", function(toggle)
     enableOppressor2Mod = toggle
     enableOppressor2ModTriggered = toggle
 end, enableOppressor2Mod)
 
-menu.toggle(vehicleFolder, 'Transform to Oppressor MK2' ,{"transformop2mode"}, 
+menu.toggle(vehicleFolder, 'Transform to Oppressor MK2' ,{"transformop2mode"},
 "Switches bike or motorbike to flight mode Oppressor MK 2 \n(Enable above function first)", function(toggle)
     enableOp2Transform = toggle
 end, enableOp2Transform)
@@ -1291,8 +1291,8 @@ onTick[#onTick+1] = function ()
     local playerEnbike = not isPlayerOnBike and PED.IS_PED_IN_ANY_VEHICLE(PLAYER.PLAYER_PED_ID(), false)
     local playerExbike = isPlayerOnBike and not PED.IS_PED_IN_ANY_VEHICLE(PLAYER.PLAYER_PED_ID(), false)
     isPlayerOnBike = PED.IS_PED_IN_ANY_VEHICLE(PLAYER.PLAYER_PED_ID(), false)
-    if onVehicleSpoofNeeded() then 
-        vehicleSpoofPatch(onVehicleSpoofNeeded()) 
+    if onVehicleSpoofNeeded() then
+        vehicleSpoofPatch(onVehicleSpoofNeeded())
     end
     enableOppressor2ModE = false
     if enableOppressor2Mod then
@@ -1307,7 +1307,7 @@ onTick[#onTick+1] = function ()
                 if gVehicleState.lastPedVehicleHandlingPtr ~= 0 then
                     Mem:new(gVehicleState.lastPedVehicleHandlingPtr + 0x158):writeLong(lastVehicleOp2Spoof)
                 end
-                
+
                 lastVehicleOp2Spoof = nil
             end
         elseif playerExbike then
@@ -1318,22 +1318,22 @@ onTick[#onTick+1] = function ()
                     util.yield()
                     Mem:new(gVehicleState.lastPedVehicle + 0x362):writeShort(0x0000)
                 end
-                
+
                 if gVehicleState.lastPedVehicleHandlingPtr ~= 0 then
                     Mem:new(gVehicleState.lastPedVehicleHandlingPtr + 0x158):writeLong(lastVehicleOp2Spoof)
                 end
                 lastVehicleOp2Spoof = nil
             end
-        end 
-        if  (not gVehicleState.currentPedVehiclePtr.isNil()) and isPlayerOnBike 
-        and gVehicleState.isCurrentVehicleEntry() and isThisVehicleABike(ENTITY.GET_ENTITY_MODEL(gVehicleState.currentPedVehicleId)) 
-        and ENTITY.GET_ENTITY_MODEL(gVehicleState.currentPedVehicleId) ~= util.joaat("oppressor2") and ENTITY.GET_ENTITY_MODEL(gVehicleState.currentPedVehicleId) ~= util.joaat("oppressor") 
+        end
+        if  (not gVehicleState.currentPedVehiclePtr.isNil()) and isPlayerOnBike
+        and gVehicleState.isCurrentVehicleEntry() and isThisVehicleABike(ENTITY.GET_ENTITY_MODEL(gVehicleState.currentPedVehicleId))
+        and ENTITY.GET_ENTITY_MODEL(gVehicleState.currentPedVehicleId) ~= util.joaat("oppressor2") and ENTITY.GET_ENTITY_MODEL(gVehicleState.currentPedVehicleId) ~= util.joaat("oppressor")
         and enableOp2Transform and not playerEnbike then
             if lastVehicleOp2Spoof == nil then
                 if playerEnvehicle and ENTITY.GET_ENTITY_MODEL(gVehicleState.lastPedVehicleId) == util.joaat("oppressor") then
                     util.yield()
                 else
-                    vehicleSpoofPatch(true) 
+                    vehicleSpoofPatch(true)
                     util.yield()
                     lastVehicleOp2Spoof = Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x918):offset(0x158).readLong()
                     Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x918):offset(0x158):writeLong(Mem:new(VBPtr):offset(0xFF0):offset(0x158):readLong())
@@ -1341,17 +1341,17 @@ onTick[#onTick+1] = function ()
                 end
             end
         end
-        if ENTITY.GET_ENTITY_MODEL(gVehicleState.lastPedVehicleId) ~= util.joaat("oppressor2") and ENTITY.GET_ENTITY_MODEL(gVehicleState.lastPedVehicleId) ~= util.joaat("oppressor") 
+        if ENTITY.GET_ENTITY_MODEL(gVehicleState.lastPedVehicleId) ~= util.joaat("oppressor2") and ENTITY.GET_ENTITY_MODEL(gVehicleState.lastPedVehicleId) ~= util.joaat("oppressor")
         and not enableOp2Transform then
             if lastVehicleOp2Spoof ~= nil then
                 local engineWasOn = false
-                if ENTITY.DOES_ENTITY_EXIST(gVehicleState.lastPedVehicleId) and ENTITY.GET_ENTITY_MODEL(gVehicleState.lastPedVehicleId) ~= util.joaat("oppressor2") 
+                if ENTITY.DOES_ENTITY_EXIST(gVehicleState.lastPedVehicleId) and ENTITY.GET_ENTITY_MODEL(gVehicleState.lastPedVehicleId) ~= util.joaat("oppressor2")
                 and ENTITY.GET_ENTITY_MODEL(gVehicleState.lastPedVehicleId) ~= util.joaat("oppressor") then
                     Mem:new(gVehicleState.lastPedVehicle + 0x362):writeShort(0x3D74)
                     util.yield()
                     Mem:new(gVehicleState.lastPedVehicle + 0x362):writeShort(0x0000)
                 end
-                
+
                 if gVehicleState.lastPedVehicleHandlingPtr ~= 0 then
                     Mem:new(gVehicleState.lastPedVehicleHandlingPtr + 0x158):writeLong(lastVehicleOp2Spoof)
                 end
@@ -1369,13 +1369,13 @@ onTick[#onTick+1] = function ()
                 if not gVehicleState.currentPedVehiclePtr.isNil() then
                     Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x918):offset(0x158):writeLong(lastVehicleOp2Spoof)
                 end
-            else    
+            else
                 Mem:new(gVehicleState.lastPedVehicleHandlingPtr + 0x158):writeLong(lastVehicleOp2Spoof)
             end
             lastVehicleOp2Spoof = nil
         end
         enableOppressor2ModE = true
-        
+
     end
 end
 onPreStop[#onPreStop+1] = function ()
@@ -1394,7 +1394,7 @@ onStop[#onStop+1] = function ()
             if not gVehicleState.currentPedVehiclePtr.isNil() then
                 Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x918):offset(0x158):writeLong(lastVehicleOp2Spoof)
             end
-        else    
+        else
             Mem:new(gVehicleState.lastPedVehicleHandlingPtr + 0x158):writeLong(lastVehicleOp2Spoof)
         end
         lastVehicleOp2Spoof = nil
@@ -1403,8 +1403,9 @@ end
 
 -- input settings
 
-menu.toggle_loop(vehicleFolder, 'Boost on B gamepad' ,{"rebindboostonbgamepad"}, 
+menu.toggle_loop(vehicleFolder, 'Boost on B gamepad' ,{"rebindboostonbgamepad"},
 "This will allow you to enable and disable boost in the vehicle (if available) on the B button on the gamepad instead of L3", function()
+
     local player = PLAYER.PLAYER_ID()
     if players.is_using_controller(player) then
         PAD.DISABLE_CONTROL_ACTION(0, 80, true)
@@ -1421,7 +1422,7 @@ menu.toggle_loop(vehicleFolder, 'Boost on B gamepad' ,{"rebindboostonbgamepad"},
             PAD.ENABLE_CONTROL_ACTION(0, 352, true)
         end
     end
-    if PAD.IS_DISABLED_CONTROL_JUST_RELEASED(0, 80) and players.is_using_controller(player) 
+    if PAD.IS_DISABLED_CONTROL_JUST_RELEASED(0, 80) and players.is_using_controller(player)
     and not HUD.IS_PAUSE_MENU_ACTIVE()  and PAD.IS_CONTROL_JUST_RELEASED(0, 177) and PAD.IS_CONTROL_JUST_RELEASED(0, 202) then
         if Mem:new(worldPtr):offset(0x08):offset(0xD10).readLong() ~= 0 and Mem:new(worldPtr):offset(0x08):offset(0xD10):offset(0xC28):offset(0):offset(0x44).readByte() ~= 1 then
             if VEHICLE.GET_IS_VEHICLE_ENGINE_RUNNING(PED.GET_VEHICLE_PED_IS_IN(PLAYER.PLAYER_PED_ID(), false)) then
@@ -1514,6 +1515,160 @@ math.floor(round(memory.read_float(pedVehicleOffsetZPtr.get()), 100)*100), 0.1*1
     setPedVehicleZOffset(capacity)
 end)
 
+local hsm1 = 0
+local hsm2 = 0
+menu.toggle(menu.my_root(), 'No hedshot mask' ,{}, "", function(toggle)
+    if toggle then
+        local hash = util.joaat("prop_welding_mask_01")
+	    STREAMING.REQUEST_MODEL(hash)
+	    local a = 0
+        while not STREAMING.HAS_MODEL_LOADED(hash) and a ~= 1000 do
+            util.yield()
+        end
+        local pos = PED.GET_PED_BONE_COORDS(players.user_ped(), 0, 0, 0, 0)
+	    hsm1 = OBJECT.CREATE_OBJECT_NO_OFFSET(hash, pos.x, pos.y, pos.z, true, true, false)
+        local hash = util.joaat("prop_mask_motobike")
+	    STREAMING.REQUEST_MODEL(hash)
+	    local a = 0
+        while not STREAMING.HAS_MODEL_LOADED(hash) and a ~= 1000 do
+            util.yield()
+        end
+        local pos = PED.GET_PED_BONE_COORDS(players.user_ped(), 0, 0, 0, 0)
+	    hsm2 = OBJECT.CREATE_OBJECT_NO_OFFSET(hash, pos.x, pos.y, pos.z, true, true, false)
+        ENTITY.ATTACH_ENTITY_TO_ENTITY(hsm1, players.user_ped(), 100, 0.03, 0.02, 0, 0, -90, 190, 0, true, false, false, 0, true)
+        ENTITY.ATTACH_ENTITY_TO_ENTITY(hsm2, players.user_ped(), 100, -0.110, -0.05, 0, 0, -90, -165, 0, true, false, false, 0, true)
+    else
+        ENTITY.DETACH_ENTITY(hsm1, true, false)
+        ENTITY.DETACH_ENTITY(hsm2, true, false)
+        entities.delete(hsm1)
+        entities.delete(hsm2)
+    end
+
+end, false)
+
+
+
+-- menu.toggle(menu.my_root(), 'Enable Deleted Vehicles' ,{}, "", function(toggle)
+--     local val = 0
+--     if toggle then
+--         val = 1
+--     end
+
+--     DV1=262145+14908
+--     DV2=262145+14916
+--     DV3=262145+17482
+--     DV4=262145+17500
+--     DV5=262145+19311
+--     DV6=262145+19335
+--     DV7=262145+20392
+--     DV8=262145+20395
+--     DV9=262145+25969
+--     DV10=262145+25975
+--     DV11=262145+25980
+--     DV12=262145+26000
+--     DV13=262145+26956
+--     DV14=262145+26957
+--     DV15=262145+28820
+--     DV16=262145+28840
+--     DV17=262145+28863
+--     DV18=262145+28866
+--     DV19=262145+30348
+--     DV20=262145+30364
+--     DV21=262145+31216
+--     DV22=262145+31232
+--     DV23=262145+32099
+--     DV24=262145+32113
+--     DV25=262145+33341
+--     DV26=262145+33359
+--     DV27=262145+34212
+--     DV28=262145+34227
+--     DV29=262145+17654
+--     DV30=262145+17675
+--     DV31=262145+21274
+--     DV32=262145+21279
+--     DV33=262145+22073
+--     DV34=262145+22092
+--     DV35=262145+23041
+--     DV36=262145+23068
+--     DV37=262145+24262
+--     DV38=262145+24277
+--     DV39=262145+24353
+--     DV40=262145+24375
+--     DV41=262145+29534
+--     DV42=262145+29541
+--     DV43=262145+29883
+--     DV44=262145+29889
+--     for i = DV1, DV2 do
+--         memory.read_byte(memory.script_global(i), val)
+--     end
+--     for i = DV3, DV4 do
+--         memory.read_byte(memory.script_global(i), val)
+--     end
+--     for i = DV5, DV6 do
+--         memory.read_byte(memory.script_global(i), val)
+--     end
+--     for i = DV7, DV8 do
+--         memory.read_byte(memory.script_global(i), val)
+--     end
+--     for i = DV9, DV10 do
+--         memory.read_byte(memory.script_global(i), val)
+--     end
+--     for i = DV11, DV12 do
+--         memory.read_byte(memory.script_global(i), val)
+--     end
+--     for i = DV13, DV14 do
+--         memory.read_byte(memory.script_global(i), val)
+--     end
+--     for i = DV15, DV16 do
+--         memory.read_byte(memory.script_global(i), val)
+--     end
+--     for i = DV17, DV18 do
+--         memory.read_byte(memory.script_global(i), val)
+--     end
+--     for i = DV19, DV20 do
+--         memory.read_byte(memory.script_global(i), val)
+--     end
+--     for i = DV21, DV22 do
+--         memory.read_byte(memory.script_global(i), val)
+--     end
+--     for i = DV23, DV24 do
+--         memory.read_byte(memory.script_global(i), val)
+--     end
+--     for i = DV25, DV26 do
+--         memory.read_byte(memory.script_global(i), val)
+--     end
+--     for i = DV27, DV28 do
+--         memory.read_byte(memory.script_global(i), val)
+--     end
+--     for i = DV29, DV30 do
+--         memory.read_byte(memory.script_global(i), val)
+--     end
+--     for i = DV31, DV32 do
+--         memory.read_byte(memory.script_global(i), val)
+--     end
+--     for i = DV33, DV34 do
+--         memory.read_byte(memory.script_global(i), val)
+--     end
+--     for i = DV35, DV36 do
+--         memory.read_byte(memory.script_global(i), val)
+--     end
+--     for i = DV37, DV38 do
+--         memory.read_byte(memory.script_global(i), val)
+--     end
+--     for i = DV39, DV40 do
+--         memory.read_byte(memory.script_global(i), val)
+--     end
+--     for i = DV41, DV42 do
+--         memory.read_byte(memory.script_global(i), val)
+--     end
+--     for i = DV43, DV44 do
+--         memory.read_byte(memory.script_global(i), val)
+--     end
+
+-- end, false)
+
+
+
 -- Animal ride
 
 local active_rideable_animal = 0
@@ -1521,7 +1676,7 @@ local attachedVehicle = nil
 local lastControlLR = false
 local creatingAnimalRide = false
 util.create_tick_handler(function()
-    if active_rideable_animal ~= 0 and not creatingAnimalRide then 
+    if active_rideable_animal ~= 0 and not creatingAnimalRide then
         displayControls()
 
         if not PED.IS_PED_IN_VEHICLE(players.user_ped(), attachedVehicle, true) then
@@ -1533,7 +1688,7 @@ util.create_tick_handler(function()
             PED.SET_PED_CONFIG_FLAG(players.user_ped(), 380, false)
         end
 
-        if PAD.IS_CONTROL_JUST_PRESSED(23, 23) then 
+        if PAD.IS_CONTROL_JUST_PRESSED(23, 23) then
             TASK.TASK_LEAVE_VEHICLE(players.user_ped(), attachedVehiclem, 0)
             util.yield(2000)
             TASK.TASK_GO_STRAIGHT_TO_COORD_RELATIVE_TO_ENTITY(active_rideable_animal, players.user_ped(), 0, -10, 0, 3.0, 4000, ENTITY.GET_ENTITY_HEADING(active_rideable_animal), 1)
@@ -1559,13 +1714,13 @@ util.create_tick_handler(function()
             end
             PED.SET_PED_CONFIG_FLAG(players.user_ped(), 380, true)
         end
-        
-        if not ENTITY.IS_ENTITY_IN_AIR(active_rideable_animal) then 
-            if PAD.IS_CONTROL_PRESSED(32, 32) then 
+
+        if not ENTITY.IS_ENTITY_IN_AIR(active_rideable_animal) then
+            if PAD.IS_CONTROL_PRESSED(32, 32) then
                 local side_move = PAD.GET_CONTROL_NORMAL(146, 146)
                 local fwd = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(active_rideable_animal, side_move*20.0, 10.0, 0.0)
                 TASK.TASK_LOOK_AT_COORD(active_rideable_animal, fwd.x, fwd.y, fwd.z, 0, 0, 2)
-                
+
                 if PAD.IS_CONTROL_PRESSED(0, 21) then
                     if side_move ~= 0 then
                         PED.SET_PED_MOVE_RATE_OVERRIDE(active_rideable_animal, 1.7)
@@ -1592,7 +1747,7 @@ util.create_tick_handler(function()
                 TASK.TASK_GO_STRAIGHT_TO_COORD_RELATIVE_TO_ENTITY(active_rideable_animal, active_rideable_animal, -10, 2, 0, 1.5, -1)
                 lastControlLR = true
             end
-            if PAD.IS_CONTROL_PRESSED(33, 33) then 
+            if PAD.IS_CONTROL_PRESSED(33, 33) then
                 local fwd = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(active_rideable_animal, 0, 0.01, 0.0)
                 TASK.TASK_GO_STRAIGHT_TO_COORD(active_rideable_animal, fwd.x, fwd.y, fwd.z, 0.0, -1, ENTITY.GET_ENTITY_HEADING(active_rideable_animal), 0)
                 lastControlLR = false
@@ -1609,18 +1764,18 @@ end)
 
 local ranimal_hashes = {util.joaat("a_c_deer"), util.joaat("a_c_boar"), util.joaat("a_c_cow")}
 menu.list_action(menu.my_root() ,"Animal ride", {"rideableanimal"}, "", {"deer", "boar", "ox"}, function(index)
-    if active_rideable_animal ~= 0 then 
+    if active_rideable_animal ~= 0 then
         util.toast("Already riding animals")
-        return 
+        return
     end
     local hash = ranimal_hashes[index]
-    
+
     request_model_load(hash)
     creatingAnimalRide = true
     local fwd = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(players.user_ped(), 1, -5.0, 0.0)
     local groundz = memory.alloc(4)
     MISC.GET_GROUND_Z_FOR_3D_COORD(fwd.x, fwd.y, fwd.z, groundz, 0, 0)
-    fwd.z = memory.read_float(groundz) or fwd.z 
+    fwd.z = memory.read_float(groundz) or fwd.z
     local animal = entities.create_ped(8, hash, fwd, ENTITY.GET_ENTITY_HEADING(players.user_ped()))
 
     ENTITY.SET_ENTITY_INVINCIBLE(animal, true)
@@ -1628,13 +1783,13 @@ menu.list_action(menu.my_root() ,"Animal ride", {"rideableanimal"}, "", {"deer",
     TASK.CLEAR_PED_TASKS(PLAYER.PLAYER_PED_ID())
     PLAYER.SET_PLAYER_CONTROL(players.user(), false, 0)
     active_rideable_animal = animal
-    local zoffset = 0 
+    local zoffset = 0
     local f_z_off = 0
     local yoffset = 0
     local xoffset = 0
     local rotx = 0
-    pluto_switch index do 
-        case 1: 
+    pluto_switch index do
+        case 1:
             zoffset = -0.35
             xoffset = -0.1
             rotx = -10
@@ -1659,7 +1814,7 @@ menu.list_action(menu.my_root() ,"Animal ride", {"rideableanimal"}, "", {"deer",
     ENTITY.SET_ENTITY_ALPHA(veh, 0, true)
     ENTITY.ATTACH_ENTITY_TO_ENTITY(veh, animal, PED.GET_PED_BONE_INDEX(animal, 24816), xoffset, yoffset, zoffset, rotx, 0.0, -90.0, false, false, false, true, 2, true)
     ENTITY.FREEZE_ENTITY_POSITION(animal, false)
-    
+
     PED.SET_PED_CONFIG_FLAG(players.user_ped(), 380, true)
     TASK.TASK_GO_STRAIGHT_TO_COORD_RELATIVE_TO_ENTITY(animal, players.user_ped(), 1, 0, 0, 3.0, 4000, ENTITY.GET_ENTITY_HEADING(active_rideable_animal), 1)
     util.yield(2000)
