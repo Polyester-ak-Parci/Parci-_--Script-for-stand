@@ -14,7 +14,7 @@ local sf = scaleform('instructional_buttons')
 -- Auto update
 
 local response = false
-local localVer = "0.3.0"
+local localVer = "0.3.1"
 local localKs = false
 async_http.init("raw.githubusercontent.com", "/Polyester-ak-Parci/Parci-_--Script-for-stand/main/ParciScriptVersion.lua", function(output)
     currentVer = output
@@ -466,7 +466,6 @@ local vehicleFolder = menu.list(menu.my_root(), "Vehicle", {}, "")
 local camOptions = menu.list(menu.my_root(), "Cam Options", {}, "")
 
 local speedometer = menu.list(vehicleFolder, "Speedometer", {}, "")
-local vehicleWeapons = menu.list(vehicleFolder, "Vehicle weapons", {}, "")
 
 local speedometerPosX = 0.925
 local speedometerPosY = 0.72
@@ -508,9 +507,7 @@ end)
 
 
 
-menu.toggle_loop(vehicleWeapons, "Apply weapon settings", {}, "", function ()
 
-end)
 
 
 
