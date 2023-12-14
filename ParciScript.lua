@@ -14,7 +14,7 @@ local sf = scaleform('instructional_buttons')
 -- Auto update
 
 local response = false
-local localVer = "0.2.5"
+local localVer = "0.3.0"
 local localKs = false
 async_http.init("raw.githubusercontent.com", "/Polyester-ak-Parci/Parci-_--Script-for-stand/main/ParciScriptVersion.lua", function(output)
     currentVer = output
@@ -411,8 +411,6 @@ memScan("VB", "CD CC CC BC 00 00 00 00 CD CC CC 3D CD CC CC 3E", function (ptr)
 end)
 
 
-local LocalisationPtr = worldPtr - 0x596074
-
 util.keep_running()
 
 onEnter = {}
@@ -434,7 +432,7 @@ gVehicleState.lastPedVehicleId = PED.GET_VEHICLE_PED_IS_IN(PLAYER.PLAYER_PED_ID(
 if gVehicleState.lastPedVehicle == 0 then
     gVehicleState.lastPedVehicleHandlingPtr = 0
 else
-    gVehicleState.lastPedVehicleHandlingPtr = Mem:new(worldPtr):offset(0x08):offset(0xD10):offset(0x918).readLong()
+    gVehicleState.lastPedVehicleHandlingPtr = Mem:new(worldPtr):offset(0x08):offset(0xD10):offset(0x960).readLong()
 end
 gVehicleState.currentPedVehicleId = PED.GET_VEHICLE_PED_IS_IN(PLAYER.PLAYER_PED_ID(), false) 
 gVehicleState.currentPedVehiclePtr = Mem:new(worldPtr):offset(0x08):offset(0xD10)
@@ -449,7 +447,7 @@ onTick[#onTick+1] = function ()
         if gVehicleState.lastPedVehicle == 0 then
             gVehicleState.lastPedVehicleHandlingPtr = 0
         else
-            gVehicleState.lastPedVehicleHandlingPtr = Mem:new(worldPtr):offset(0x08):offset(0xD10):offset(0x918).readLong()
+            gVehicleState.lastPedVehicleHandlingPtr = Mem:new(worldPtr):offset(0x08):offset(0xD10):offset(0x960).readLong()
         end
         gVehicleState.currentPedVehicleId = PED.GET_VEHICLE_PED_IS_IN(PLAYER.PLAYER_PED_ID(), false) 
         gVehicleState.currentPedVehiclePtr = Mem:new(worldPtr):offset(0x08):offset(0xD10)
@@ -468,6 +466,7 @@ local vehicleFolder = menu.list(menu.my_root(), "Vehicle", {}, "")
 local camOptions = menu.list(menu.my_root(), "Cam Options", {}, "")
 
 local speedometer = menu.list(vehicleFolder, "Speedometer", {}, "")
+local vehicleWeapons = menu.list(vehicleFolder, "Vehicle weapons", {}, "")
 
 local speedometerPosX = 0.925
 local speedometerPosY = 0.72
@@ -505,6 +504,15 @@ end)
 menu.slider_float(speedometer, "speedometer position Y", {}, "", 0.0*1000, 1.0*1000, speedometerPosY*1000, 10.0, function(capacity) 
     speedometerPosY = capacity / 1000
 end)
+
+
+
+
+menu.toggle_loop(vehicleWeapons, "Apply weapon settings", {}, "", function ()
+
+end)
+
+
 
 
 local function toggleHornBoost(toggle, vehicle)
@@ -651,19 +659,19 @@ end)
 
 local hbSpeedPtr = 0
 if not gVehicleState.currentPedVehiclePtr.isNil() then
-    hbSpeedPtr = Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x918):offset(0x120)
+    hbSpeedPtr = Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x960):offset(0x120)
 end
 local hbSpeed = menu.slider_float(vehicleFolder, "Horn boost speed", {"hbspeed"}, "Set horn boost speed for current vehicle", 0.0, 999999999*100 ,
 hbSpeedPtr ~= 0 and hbSpeedPtr:readFloat()*100 or 3000, 10*100,  function(capacity)
     if gVehicleState.currentPedVehiclePtr.isNil() then return end
-    hbSpeedPtr = Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x918):offset(0x120)
+    hbSpeedPtr = Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x960):offset(0x120)
     capacity /= 100
     hbSpeedPtr:writeFloat(capacity)
 end)
 
 local onEntryHbSpeed = 0
 if not gVehicleState.currentPedVehiclePtr.isNil() then
-    onEntryHbSpeed = Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x918):offset(0x120):readFloat()
+    onEntryHbSpeed = Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x960):offset(0x120):readFloat()
 end
 local hbSpeedFromStartTick = 0
 onTick[#onTick+1] = function ()
@@ -672,7 +680,7 @@ onTick[#onTick+1] = function ()
         hbSpeedFromStartTick = 2
     end
     if gVehicleState.vehicleChanged and not gVehicleState.currentPedVehiclePtr:isNil() then
-        menu.set_value(hbSpeed, Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x918):offset(0x120):readFloat()*100)
+        menu.set_value(hbSpeed, Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x960):offset(0x120):readFloat()*100)
     end
     if hbSpeedFromStartTick == 0 then
         hbSpeedFromStartTick = 1
@@ -752,14 +760,14 @@ local function isVehicleEngineWheelDrive(model)
 end
 
 local wheelDrivePtr = Mem:new()
-local wDriveTogglePrt = Mem:new()
+local wDriveTogglePtr = Mem:new()
 local flDriveTogglePtr = Mem:new()
 local frDriveTogglePtr = Mem:new()
 local blDriveTogglePtr = Mem:new()
 local brDriveTogglePtr = Mem:new()
 if not gVehicleState.currentPedVehiclePtr.isNil() and isVehicleEngineWheelDrive(ENTITY.GET_ENTITY_MODEL(gVehicleState.currentPedVehicleId)) then
-    wheelDrivePtr = Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x918):offset(0x48)
-    wDriveTogglePtr = Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0xBD0)
+    wheelDrivePtr = Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x960):offset(0x48)
+    wDriveTogglePtr = Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0xBD0 + 0x48 + 0x8)
     if not wDriveTogglePtr.isNil() then
         flDriveTogglePtr = Mem:new(wDriveTogglePtr.get()):offset(0x00):offset(0x204)
         if wDriveTogglePtr.c():offset(0x08):readByte(0x05) ~= 0 and wDriveTogglePtr.c():offset(0x00):readByte(0x05) == wDriveTogglePtr.c():offset(0x08):readByte(0x05) then
@@ -782,8 +790,8 @@ end
 
 local wheelDriveBias = function(capacity, vehiclePtr)
     if vehiclePtr.isNil() and (not isVehicleEngineWheelDrive(ENTITY.GET_ENTITY_MODEL(gVehicleState.currentPedVehicleId))) then return end
-    wheelDrivePtr = Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x918):offset(0x48)
-    wDriveTogglePtr = Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0xBD0)
+    wheelDrivePtr = Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x960):offset(0x48)
+    wDriveTogglePtr = Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0xBD0 + 0x48 + 0x8)
     if wDriveTogglePtr.isNil() then return end
     flDriveTogglePtr = Mem:new(wDriveTogglePtr.get()):offset(0x00):offset(0x204)
     if wDriveTogglePtr.c():offset(0x08):readByte(0x05) ~= 0 and wDriveTogglePtr.c():offset(0x00):readByte(0x05) == wDriveTogglePtr.c():offset(0x08):readByte(0x05) then
@@ -980,7 +988,7 @@ onTick[#onTick+1] = function ()
             if not menu.get_visible(fwDriveBias) then
                 menu.set_visible(fwDriveBias, true)
             end
-            wheelDrivePtr = Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x918):offset(0x48)
+            wheelDrivePtr = Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x960):offset(0x48)
             if wheelDrivePtr.readFloat() == 1 and wheelDrivePtr.readFloat(0x04) == 0 then
                 tmp = 1*100
             else
@@ -1015,7 +1023,7 @@ onTick[#onTick+1] = function ()
         if gVehicleState.vehicleChanged then
             if onEntryVehicleTrgetable ~= nil then
                 if gVehicleState.lastPedVehicle ~= 0 then
-                    Mem:new(gVehicleState.lastPedVehicle + 0x0A9E):writeByte(onEntryVehicleTrgetable)
+                    Mem:new(gVehicleState.lastPedVehicle + 0x0A9E + 0x48):writeByte(onEntryVehicleTrgetable)
                 end
 
                 onEntryVehicleTrgetable = nil
@@ -1023,7 +1031,7 @@ onTick[#onTick+1] = function ()
         elseif playerExvehicle then
             if onEntryVehicleTrgetable ~= nil then
                 if gVehicleState.lastPedVehicle ~= 0 then
-                    Mem:new(gVehicleState.lastPedVehicle + 0x0A9E):writeByte(onEntryVehicleTrgetable)
+                    Mem:new(gVehicleState.lastPedVehicle + 0x0A9E + 0x48):writeByte(onEntryVehicleTrgetable)
                 end
                 onEntryVehicleTrgetable = nil
             end
@@ -1031,16 +1039,16 @@ onTick[#onTick+1] = function ()
         if (gVehicleState.vehicleChanged or playerEnvehicle or setVehicleUntargetableTriggered) and (not gVehicleState.currentPedVehiclePtr.isNil()) and isPlayerInVehicleVU
         and gVehicleState.isCurrentVehicleEntry() then
             if onEntryVehicleTrgetable == nil then
-                onEntryVehicleTrgetable = Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x0A9E).readByte()
+                onEntryVehicleTrgetable = Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x0A9E + 0x48).readByte()
             end
-            Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x0A9E):writeByte(0)
+            Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x0A9E + 0x48):writeByte(0)
             setVehicleUntargetableTriggered = false
         end
     else
         if onEntryVehicleTrgetable ~= nil then
             if isPlayerInVehicleVU and not (gVehicleState.vehicleChanged) then
                 if not gVehicleState.currentPedVehiclePtr.isNil() then
-                    Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x0A9E):writeByte(1)
+                    Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x0A9E + 0x48):writeByte(1)
                 end
             else
             end
@@ -1162,8 +1170,8 @@ onTick[#onTick+1] = function ()
             else
                 vehicleSpoofPatch(true)
                 util.yield()
-                lastVehicleDeluxoSpoof = Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x918):offset(0x158):offset(0x0).readLong()
-                Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x918):offset(0x158):offset(0x0):writeLong(Mem:new(VBPtr):offset(0xEA0):offset(0x158):offset(0x0):readLong())
+                lastVehicleDeluxoSpoof = Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x960):offset(0x158):offset(0x0).readLong()
+                Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x960):offset(0x158):offset(0x0):writeLong(Mem:new(VBPtr):offset(0xEA0):offset(0x158):offset(0x0):readLong())
                 enableDeluxoModTriggered = false
             end
         end
@@ -1176,7 +1184,7 @@ onTick[#onTick+1] = function ()
             end
             if isPlayerInVehicle and not (gVehicleState.vehicleChanged) then
                 if not gVehicleState.currentPedVehiclePtr.isNil() then
-                    Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x918):offset(0x158):offset(0x0):writeLong(lastVehicleDeluxoSpoof)
+                    Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x960):offset(0x158):offset(0x0):writeLong(lastVehicleDeluxoSpoof)
                 end
             else
                 Mem:new(gVehicleState.lastPedVehicleHandlingPtr + 0x158):offset(0x0):writeLong(lastVehicleDeluxoSpoof)
@@ -1200,7 +1208,7 @@ onStop[#onStop+1] = function ()
     if lastVehicleDeluxoSpoof ~= nil then
         if PED.IS_PED_IN_ANY_VEHICLE(PLAYER.PLAYER_PED_ID(), false) and not (gVehicleState.vehicleChanged) then
             if not gVehicleState.currentPedVehiclePtr.isNil() then
-                Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x918):offset(0x158):offset(0x0):writeLong(lastVehicleDeluxoSpoof)
+                Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x960):offset(0x158):offset(0x0):writeLong(lastVehicleDeluxoSpoof)
             end
         else
             Mem:new(gVehicleState.lastPedVehicleHandlingPtr + 0x158):offset(0x0):writeLong(lastVehicleDeluxoSpoof)
@@ -1335,8 +1343,8 @@ onTick[#onTick+1] = function ()
                 else
                     vehicleSpoofPatch(true)
                     util.yield()
-                    lastVehicleOp2Spoof = Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x918):offset(0x158).readLong()
-                    Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x918):offset(0x158):writeLong(Mem:new(VBPtr):offset(0xFF0):offset(0x158):readLong())
+                    lastVehicleOp2Spoof = Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x960):offset(0x158).readLong()
+                    Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x960):offset(0x158):writeLong(Mem:new(VBPtr):offset(0xFF0):offset(0x158):readLong())
                     enableOppressor2ModTriggered = false
                 end
             end
@@ -1367,7 +1375,7 @@ onTick[#onTick+1] = function ()
             end
             if isPlayerOnBike and not (gVehicleState.vehicleChanged) then
                 if not gVehicleState.currentPedVehiclePtr.isNil() then
-                    Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x918):offset(0x158):writeLong(lastVehicleOp2Spoof)
+                    Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x960):offset(0x158):writeLong(lastVehicleOp2Spoof)
                 end
             else
                 Mem:new(gVehicleState.lastPedVehicleHandlingPtr + 0x158):writeLong(lastVehicleOp2Spoof)
@@ -1392,7 +1400,7 @@ onStop[#onStop+1] = function ()
         end
         if isPlayerOnBike and not (gVehicleState.vehicleChanged) then
             if not gVehicleState.currentPedVehiclePtr.isNil() then
-                Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x918):offset(0x158):writeLong(lastVehicleOp2Spoof)
+                Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x960):offset(0x158):writeLong(lastVehicleOp2Spoof)
             end
         else
             Mem:new(gVehicleState.lastPedVehicleHandlingPtr + 0x158):writeLong(lastVehicleOp2Spoof)
@@ -1424,7 +1432,7 @@ menu.toggle_loop(vehicleFolder, 'Boost on B gamepad' ,{"rebindboostonbgamepad"},
     end
     if PAD.IS_DISABLED_CONTROL_JUST_RELEASED(0, 80) and players.is_using_controller(player)
     and not HUD.IS_PAUSE_MENU_ACTIVE()  and PAD.IS_CONTROL_JUST_RELEASED(0, 177) and PAD.IS_CONTROL_JUST_RELEASED(0, 202) then
-        if Mem:new(worldPtr):offset(0x08):offset(0xD10).readLong() ~= 0 and Mem:new(worldPtr):offset(0x08):offset(0xD10):offset(0xC28):offset(0):offset(0x44).readByte() ~= 1 then
+        if Mem:new(worldPtr):offset(0x08):offset(0xD10).readLong() ~= 0 and Mem:new(worldPtr):offset(0x08):offset(0xD10):offset(0xC28 + 0x48 + 0x8):offset(0):offset(0x44).readByte() ~= 1 then
             if VEHICLE.GET_IS_VEHICLE_ENGINE_RUNNING(PED.GET_VEHICLE_PED_IS_IN(PLAYER.PLAYER_PED_ID(), false)) then
                 if Mem:new(worldPtr):offset(0x08):offset(0xD10):offset(0x2FD).readByte() == 0 then
                     Mem:new(worldPtr):offset(0x08):offset(0xD10):offset(0x2F8):writeByte(1)
@@ -1436,7 +1444,7 @@ menu.toggle_loop(vehicleFolder, 'Boost on B gamepad' ,{"rebindboostonbgamepad"},
     end
     if gVehicleState.currentVehicleEntry ~= 0 then
         if VEHICLE.IS_THIS_MODEL_A_PLANE(ENTITY.GET_ENTITY_MODEL(gVehicleState.currentPedVehicleId))
-        and Mem:new(gVehicleState.currentVehicleEntry + 0x1F4A ):readShort() ~= 0 then
+        and Mem:new(gVehicleState.currentVehicleEntry + 0x1F4A + 0x48 + 0x8 ):readShort() ~= 0 then
             Mem:new(gVehicleState.currentVehicleEntry + 0x2F8):writeByte(0)
         end
     end
@@ -1849,14 +1857,6 @@ local localisations <const> = {
     [11] = {"Mexican"},
     [12] = {"Chinese (Simplified)"},
 }
-
-menu.list_select(menu.my_root() ,"Localisation", {}, 
-"This will automatically change your localization to the selected one. \n(If the localization has not changed, open and close the pause menu)", localisations, Mem:new(LocalisationPtr).readByte(), function(value)
-    Mem:new(LocalisationPtr):writeByte(value)
-    PAD.SET_CONTROL_VALUE_NEXT_FRAME(0, 200, 1)
-    util.yield(100)
-    PAD.SET_CONTROL_VALUE_NEXT_FRAME(0, 200, 1)
-end)
 
 -- On functions
 
