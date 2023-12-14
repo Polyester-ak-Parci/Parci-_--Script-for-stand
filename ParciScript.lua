@@ -14,7 +14,7 @@ local sf = scaleform('instructional_buttons')
 -- Auto update
 
 local response = false
-local localVer = "0.3.1"
+local localVer = "0.3.2"
 local localKs = false
 async_http.init("raw.githubusercontent.com", "/Polyester-ak-Parci/Parci-_--Script-for-stand/main/ParciScriptVersion.lua", function(output)
     currentVer = output
@@ -693,13 +693,13 @@ end)
 local accelerationVal = 0
 local accelerationPtr = 0
 if not gVehicleState.currentPedVehiclePtr.isNil() then
-    accelerationPtr = Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x8A4)
+    accelerationPtr = Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x8A4 + 0x14)
     accelerationVal = round(accelerationPtr.readFloat(), 10000) or 0
 end
 
 local setVehicleAcceleration = function(val)
     if gVehicleState.currentVehicleEntry == 0 then return end
-    accelerationPtr = Mem:new(gVehicleState.currentVehicleEntry + 0x8A4)
+    accelerationPtr = Mem:new(gVehicleState.currentVehicleEntry + 0x8A4 + 0x14)
     accelerationPtr:writeFloat(val)
     accelerationVal = val
 end
@@ -721,7 +721,7 @@ onTick[#onTick+1] = function ()
     end
     if gVehicleState.vehicleChanged then
         if gVehicleState.currentVehicleEntry ~= 0 then
-            accelerationPtr = Mem:new(gVehicleState.currentVehicleEntry + 0x8A4)
+            accelerationPtr = Mem:new(gVehicleState.currentVehicleEntry + 0x8A4 + 0x14)
             accelerationVal = round(accelerationPtr.readFloat(), 10000)
             menu.set_value(vehicleAcceleration, math.floor(accelerationVal *10000))
         else
