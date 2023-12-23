@@ -14,7 +14,7 @@ local sf = scaleform('instructional_buttons')
 -- Auto update
 
 local response = false
-local localVer = "0.3.2"
+local localVer = "0.3.3"
 local localKs = false
 async_http.init("raw.githubusercontent.com", "/Polyester-ak-Parci/Parci-_--Script-for-stand/main/ParciScriptVersion.lua", function(output)
     currentVer = output
@@ -1220,23 +1220,23 @@ local ttdmMenu = menu.toggle(vehicleFolder, 'Transform to Deluxo mod' ,{"transfo
 "Switches the vehicle to Deluxo flight mode \n(Enable the above function first)", function(toggle)
     if enableDeluxoMod and (not enableDeluxoModTriggered) and gVehicleState.currentPedVehicleId and ENTITY.GET_ENTITY_MODEL(gVehicleState.currentPedVehicleId) ~= util.joaat("deluxo")
     and isThisVehicle4Wheel(ENTITY.GET_ENTITY_MODEL(gVehicleState.currentPedVehicleId)) and not deluxoTransformOnTransition then
-        if toggle and Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x362).readShort() ~= 0x3F80 then
+        if toggle and Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x34A).readShort() ~= 0x3F80 then
             enableDeluxoTransform = true
             deluxoTransformOnTransition = true
             VEHICLE.SET_SPECIAL_FLIGHT_MODE_RATIO(gVehicleState.currentPedVehicleId, 0)
             VEHICLE.SET_SPECIAL_FLIGHT_MODE_TARGET_RATIO(gVehicleState.currentPedVehicleId, 1)
             while gVehicleState.currentVehicleEntry ~= 0 and (not gVehicleState.vehicleChanged)
-            and Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x362).readShort() ~= 0x3F80 do
+            and Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x34A).readShort() ~= 0x3F80 do
                 util.yield()
             end
             deluxoTransformOnTransition = false
-        elseif not toggle and Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x362).readShort() ~= 0x0 then
+        elseif not toggle and Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x34A).readShort() ~= 0x0 then
             enableDeluxoTransform = false
             deluxoTransformOnTransition = true
             VEHICLE.SET_SPECIAL_FLIGHT_MODE_RATIO(gVehicleState.currentPedVehicleId, 1)
             VEHICLE.SET_SPECIAL_FLIGHT_MODE_TARGET_RATIO(gVehicleState.currentPedVehicleId, 0)
             while gVehicleState.currentVehicleEntry ~= 0 and (not gVehicleState.vehicleChanged)
-            and Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x362).readShort() ~= 0x0 do
+            and Mem:new(gVehicleState.currentPedVehiclePtr.get()):offset(0x34A).readShort() ~= 0x0 do
                 util.yield()
             end
             deluxoTransformOnTransition = false
@@ -1305,9 +1305,9 @@ onTick[#onTick+1] = function ()
             if lastVehicleOp2Spoof ~= nil and gVehicleState.lastPedVehicleHandlingPtr ~= 0 and gVehicleState.lastPedVehicleHandlingPtr ~= nil then
                 local engineWasOn = false
                 if ENTITY.DOES_ENTITY_EXIST(gVehicleState.lastPedVehicleId) and ENTITY.GET_ENTITY_MODEL(gVehicleState.lastPedVehicleId) ~= util.joaat("oppressor2") then
-                    Mem:new(gVehicleState.lastPedVehicle + 0x362):writeShort(0x3D74)
+                    Mem:new(gVehicleState.lastPedVehicle + 0x34A):writeShort(0x3D74)
                     util.yield()
-                    Mem:new(gVehicleState.lastPedVehicle + 0x362):writeShort(0x0000)
+                    Mem:new(gVehicleState.lastPedVehicle + 0x34A):writeShort(0x0000)
                 end
                 if gVehicleState.lastPedVehicleHandlingPtr ~= 0 then
                     Mem:new(gVehicleState.lastPedVehicleHandlingPtr + 0x158):writeLong(lastVehicleOp2Spoof)
@@ -1319,9 +1319,9 @@ onTick[#onTick+1] = function ()
             if lastVehicleOp2Spoof ~= nil then
                 local engineWasOn = false
                 if ENTITY.DOES_ENTITY_EXIST(gVehicleState.lastPedVehicleId) and ENTITY.GET_ENTITY_MODEL(gVehicleState.lastPedVehicleId) ~= util.joaat("oppressor2") then
-                    Mem:new(gVehicleState.lastPedVehicle + 0x362):writeShort(0x3D74)
+                    Mem:new(gVehicleState.lastPedVehicle + 0x34A):writeShort(0x3D74)
                     util.yield()
-                    Mem:new(gVehicleState.lastPedVehicle + 0x362):writeShort(0x0000)
+                    Mem:new(gVehicleState.lastPedVehicle + 0x34A):writeShort(0x0000)
                 end
 
                 if gVehicleState.lastPedVehicleHandlingPtr ~= 0 then
@@ -1352,9 +1352,9 @@ onTick[#onTick+1] = function ()
                 local engineWasOn = false
                 if ENTITY.DOES_ENTITY_EXIST(gVehicleState.lastPedVehicleId) and ENTITY.GET_ENTITY_MODEL(gVehicleState.lastPedVehicleId) ~= util.joaat("oppressor2")
                 and ENTITY.GET_ENTITY_MODEL(gVehicleState.lastPedVehicleId) ~= util.joaat("oppressor") then
-                    Mem:new(gVehicleState.lastPedVehicle + 0x362):writeShort(0x3D74)
+                    Mem:new(gVehicleState.lastPedVehicle + 0x34A):writeShort(0x3D74)
                     util.yield()
-                    Mem:new(gVehicleState.lastPedVehicle + 0x362):writeShort(0x0000)
+                    Mem:new(gVehicleState.lastPedVehicle + 0x34A):writeShort(0x0000)
                 end
 
                 if gVehicleState.lastPedVehicleHandlingPtr ~= 0 then
@@ -1366,9 +1366,9 @@ onTick[#onTick+1] = function ()
     else
         if lastVehicleOp2Spoof ~= nil then
             if ENTITY.DOES_ENTITY_EXIST(gVehicleState.lastPedVehicleId) and ENTITY.GET_ENTITY_MODEL(gVehicleState.lastPedVehicleId) ~= util.joaat("oppressor2") then
-                Mem:new(gVehicleState.lastPedVehicle + 0x362):writeShort(0x3D74)
+                Mem:new(gVehicleState.lastPedVehicle + 0x34A):writeShort(0x3D74)
                 util.yield()
-                Mem:new(gVehicleState.lastPedVehicle + 0x362):writeShort(0x0000)
+                Mem:new(gVehicleState.lastPedVehicle + 0x34A):writeShort(0x0000)
             end
             if isPlayerOnBike and not (gVehicleState.vehicleChanged) then
                 if not gVehicleState.currentPedVehiclePtr.isNil() then
@@ -1386,14 +1386,14 @@ end
 onPreStop[#onPreStop+1] = function ()
     if lastVehicleOp2Spoof ~= nil then
         if ENTITY.DOES_ENTITY_EXIST(gVehicleState.lastPedVehicleId) and ENTITY.GET_ENTITY_MODEL(gVehicleState.lastPedVehicleId) ~= util.joaat("oppressor2") then
-            Mem:new(gVehicleState.lastPedVehicle + 0x362):writeShort(0x3D74)
+            Mem:new(gVehicleState.lastPedVehicle + 0x34A):writeShort(0x3D74)
         end
     end
 end
 onStop[#onStop+1] = function ()
     if lastVehicleOp2Spoof ~= nil then
         if ENTITY.DOES_ENTITY_EXIST(gVehicleState.lastPedVehicleId) and ENTITY.GET_ENTITY_MODEL(gVehicleState.lastPedVehicleId) ~= util.joaat("oppressor2") then
-            Mem:new(gVehicleState.lastPedVehicle + 0x362):writeShort(0x0000)
+            Mem:new(gVehicleState.lastPedVehicle + 0x34A):writeShort(0x0000)
         end
         if isPlayerOnBike and not (gVehicleState.vehicleChanged) then
             if not gVehicleState.currentPedVehiclePtr.isNil() then
